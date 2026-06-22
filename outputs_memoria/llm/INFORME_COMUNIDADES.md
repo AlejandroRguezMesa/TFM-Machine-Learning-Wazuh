@@ -260,7 +260,7 @@ señalables como trabajo futuro en la memoria):
   sospechosos o IPs en listas de reputación. Esto añadiría señal sin
   enviar alertas crudas.
 
-La conclusión defendible para el TFM no cambia: el prototipo cumple
+El prototipo cumple
 exactamente lo que prometía, que es demostrar que el resumen agregado
 de Capa 3 es base suficiente para un triaje útil. Las limitaciones
 que muestra son las que cabía esperar de la abstracción elegida, y
