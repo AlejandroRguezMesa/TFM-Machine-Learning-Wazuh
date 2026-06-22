@@ -10,7 +10,7 @@ Sistema que correlaciona alertas de **Wazuh 4.14** en tres capas:
 - **Capa 3** — Grafo de filas + comunidades **Louvain**, con resolución
   de activos (IP/host/usuario) y decaimiento temporal opcional.
 
-Sobre las comunidades resultantes hay un prototipo opcional de **triaje
+Sobre las comunidades resultantes hay un prototipo  de **triaje
 con LLM** (`llm_triage.py`).
 
 ---
@@ -167,7 +167,7 @@ $EDITOR .env            # rellenar WAZUH_INDEXER_PASS
 chmod 600 .env
 ```
 
-### 3.5 Dashboard de Wazuh (opcional)
+### 3.5 Dashboard de Wazuh
 
 En Wazuh → Stack Management → Saved Objects → Import, importar
 `configs/tfm_correlation_dashboard.ndjson` (o
@@ -233,7 +233,7 @@ anonimizado usando el mismo mapa.
 Para reproducir el comportamiento con nombres en claro:
 `bash run_seguimiento2.sh --no-anonymize`.
 
-### 4.4 Análisis exploratorio del nuevo volcado (opcional)
+### 4.4 Análisis exploratorio del nuevo volcado 
 
 ```bash
 source .venv/bin/activate
@@ -333,7 +333,7 @@ Figuras y tablas resultantes: `capturas_temporal/`.
 
 ---
 
-## 8. Triaje LLM (prototipo, opcional)
+## 8. Triaje LLM (prototipo)
 
 `llm_triage.py` toma una comunidad de la Capa 3 y genera un triaje
 estructurado con un LLM externo (Gemini, Groq, etc.). El contexto
