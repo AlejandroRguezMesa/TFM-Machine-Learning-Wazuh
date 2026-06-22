@@ -26,9 +26,7 @@ Uso:
 """
 from __future__ import annotations
 import argparse
-import json
-import re
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -38,6 +36,13 @@ import matplotlib
 matplotlib.use("Agg")  # backend sin display, necesario en servidor
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+
+# Reutilizamos la logica de matching de verify_scenarios.py para que la
+# figura de recall/pureza muestre exactamente los mismos numeros que la
+# herramienta de verificacion (anonimizacion, filtrado de entidades
+# genericas, source/destination address, etc.).
+import verify_scenarios as vs
+from anonymization import maybe_load, DEFAULT_MAP_PATH
 
 
 # ----------------------------------------------------------------------
@@ -244,54 +249,50 @@ def fig_actividad_temporal(df, out_dir):
 # ----------------------------------------------------------------------
 # Figura 7 — Verificacion de escenarios (recall y pureza)
 # ----------------------------------------------------------------------
-def _scenario_metrics(df, gt_path):
-    """Reproduce el calculo de recall y pureza de verify_scenarios.py
-    de forma compacta. Devuelve lista de dicts por escenario."""
+def _scenario_metrics(df, gt_path, user_alias_map=None):
+    """Calcula recall y pureza por escenario reutilizando la logica de
+    verify_scenarios.py (anonimizacion + filtrado de entidades genericas
+    + source/destination address). Devuelve lista de dicts por escenario,
+    o None si no hay ground_truth.jsonl."""
     if not gt_path.exists():
         return None
-    # entidades discriminantes por escenario base
-    by_scn = defaultdict(set)
-    with open(gt_path) as f:
-        for line in f:
-            rec = json.loads(line)
-            base = re.sub(r"-[0-9a-f]{6,}$", "", rec["incident_id"])
-            for v in (rec.get("entities") or {}).values():
-                if isinstance(v, str) and v:
-                    by_scn[base].add(v.lower())
-            for v in (rec.get("vars") or {}).values():
-                if isinstance(v, str) and v and not v.isdigit():
-                    by_scn[base].add(v.lower())
 
-    def row_ents(r):
-        out = set()
-        for col in ("entity_users", "entity_ips", "entity_hosts"):
-            for x in _iter_entities(r.get(col)):
-                x = str(x).lower()
-                for p in ("user:", "ip:", "host:", "asset:"):
-                    if x.startswith(p):
-                        out.add(x[len(p):])
-                out.add(x)
-        return out
+    # verify_scenarios.load_gt() lee de una constante de modulo. Si el
+    # usuario pasa un --ground-truth distinto al por defecto, lo
+    # apuntamos temporalmente al fichero pedido.
+    original_gt = vs.GT
+    try:
+        vs.GT = gt_path
+        gt = vs.load_gt()
+    finally:
+        vs.GT = original_gt
+
+    anon = maybe_load(user_alias_map or str(DEFAULT_MAP_PATH))
+
+    # entidades del GT agrupadas por escenario base (mismo agrupamiento
+    # que verify_scenarios.py).
+    by_scenario = defaultdict(lambda: {"entities": set()})
+    for inc in gt.values():
+        by_scenario[inc["base"]]["entities"].update(inc["entities"])
 
     df = df.copy()
-    df["_e"] = df.apply(row_ents, axis=1)
+    df["_ents"] = df.apply(vs.collect_alert_entities, axis=1)
+
     res = []
-    for scn in sorted(by_scn):
-        cands = set()
-        for e in by_scn[scn]:
-            cands.add(e)
-            if "@" in e:
-                cands.add(e.split("@")[0])
-            if "\\" in e:
-                cands.add(e.split("\\")[-1])
-        mask = df["_e"].apply(lambda es: bool(es & cands))
+    for scn in sorted(by_scenario):
+        candidates = set()
+        for e in by_scenario[scn]["entities"]:
+            candidates.update(vs.normalize_for_match(e, anon=anon))
+        mask = df["_ents"].apply(
+            lambda es, c=candidates: any(x in es for x in c)
+        )
         hits = df[mask]
         if hits.empty:
-            res.append({"escenario": scn, "recall": 0, "purity": 0})
+            res.append({"escenario": scn, "recall": 0.0, "purity": 0.0})
             continue
         cd = hits[hits["community_id"] >= 0]["community_id"].value_counts()
         if cd.empty:
-            res.append({"escenario": scn, "recall": 0, "purity": 0})
+            res.append({"escenario": scn, "recall": 0.0, "purity": 0.0})
             continue
         main = int(cd.index[0])
         n_in = int(cd.iloc[0])
@@ -299,13 +300,13 @@ def _scenario_metrics(df, gt_path):
         res.append({
             "escenario": scn,
             "recall": n_in / len(hits),
-            "purity": n_in / csize if csize else 0,
+            "purity": n_in / csize if csize else 0.0,
         })
     return res
 
 
-def fig_verificacion_escenarios(df, out_dir, gt_path):
-    metrics = _scenario_metrics(df, gt_path)
+def fig_verificacion_escenarios(df, out_dir, gt_path, user_alias_map=None):
+    metrics = _scenario_metrics(df, gt_path, user_alias_map=user_alias_map)
     if not metrics:
         print("  (omitida fig_07: sin ground_truth.jsonl)")
         return
@@ -326,10 +327,11 @@ def fig_verificacion_escenarios(df, out_dir, gt_path):
                     f"{b.get_height():.0%}", ha="center", fontsize=9)
     ax.set_xticks(x)
     ax.set_xticklabels(nombres)
-    ax.set_ylim(0, 1.15)
+    ax.set_ylim(0, 1.25)
     ax.set_ylabel("Proporcion")
     ax.set_title("Verificacion de escenarios: recall y pureza")
-    ax.legend()
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.12),
+              ncol=2, frameon=False)
     ax.grid(axis="x", visible=False)
     _save(fig, out_dir, "fig_07_verificacion_escenarios")
 
@@ -376,6 +378,10 @@ def main():
                     default="lab_state/real_alerts_incidents.parquet")
     ap.add_argument("--ground-truth",
                     default="lab_state/ground_truth.jsonl")
+    ap.add_argument("--user-alias-map", default=str(DEFAULT_MAP_PATH),
+                    help="ruta del mapa de anonimizacion para resolver "
+                         "entidades del ground_truth contra el parquet "
+                         "anonimizado")
     ap.add_argument("--out", default="capturas")
     args = ap.parse_args()
 
@@ -396,7 +402,8 @@ def main():
     fig_clusters_vs_comunidades(df, out_dir)
     fig_top_comunidades(df, out_dir)
     fig_actividad_temporal(df, out_dir)
-    fig_verificacion_escenarios(df, out_dir, Path(args.ground_truth))
+    fig_verificacion_escenarios(df, out_dir, Path(args.ground_truth),
+                                user_alias_map=args.user_alias_map)
     fig_cobertura_entidades(df, out_dir)
 
     print(f"\nListo. Figuras en {out_dir}/")
