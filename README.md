@@ -1,6 +1,7 @@
 # TFM — Sistema de correlación multi-capa de alertas Wazuh
 
 Trabajo Fin de Máster (Máster en Inteligencia Artificial, UAX).
+**Autor:** Alejandro Rodríguez Mesa
 
 Sistema que correlaciona alertas de **Wazuh 4.14** en tres capas:
 
@@ -83,6 +84,7 @@ repositorio/
     ├── tablas/
     ├── eda/
     ├── casos/                   Inspección de comunidades por escenario
+    ├── TFM — Métricas de correlación - Wazuh.pdf     Muestra del Dahsboard de Wazuh con los resultados de la ejecución.
     └── llm/                     Triaje LLM de comunidades y comparativa
 ```
 
