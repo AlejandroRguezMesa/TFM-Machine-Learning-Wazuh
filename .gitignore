@@ -1,0 +1,22 @@
+# Entorno virtual y cache de Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Credenciales reales (la plantilla .env.example si se sube)
+.env
+
+# Estado local del pipeline (parquets, ground truth, mapa de alias, logs)
+lab_state/
+run_logs/
+*.log
+
+# Artefactos locales no destinados al repositorio
+backup_pre_bugfixes_*/
+backups/
+
+# Editores / sistema
+.idea/
+.vscode/
+.DS_Store

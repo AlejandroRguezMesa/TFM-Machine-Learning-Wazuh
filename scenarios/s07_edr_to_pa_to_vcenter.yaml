@@ -1,0 +1,231 @@
+# Escenario S07 — Endpoint comprometido → exfiltración multi-vector
+#
+# DEMUESTRA: Capa 3 cruzando TRIPLE entre SentinelOne + PaloAlto + vCenter.
+#
+# Entidades UNIQUE-TO-SCENARIO:
+#   victim_host1:  TFM-SRV-FILE01  (prefijo único)
+#   victim_host2:  TFM-SRV-DB02
+#   victim_ip*:    10.99.7.x       (subred reservada)
+#   c2_ip*:        91.241.19.84 + 78.46.99.123  (no en el fondo)
+#   threats:       TFM-* nombres   (prefijo único)
+#
+# VOLUMEN: 2 hosts víctima, ~110 alertas (3x más que la v1).
+
+incident_id: INC-S07
+name: "Endpoints comprometidos con exfiltración multi-vector (S1+PA+vCenter)"
+
+entities:
+  victim_host1: "TFM-SRV-FILE01"
+  victim_host2: "TFM-SRV-DB02"
+  victim_ip1: "10.99.7.49"
+  victim_ip2: "10.99.7.78"
+  c2_ip1: "91.241.19.84"
+  c2_ip2: "78.46.99.123"
+  attacker_user: "VSPHERE.LOCAL\\\\tfm-administrator"
+  threat_name1: "TFM-Trojan.GenericKD.45123"
+  threat_name2: "TFM-HackTool.Mimikatz"
+  threat_name3: "TFM-Backdoor.Generic"
+
+events:
+  # === FASE 1: EDR DETECTA AMENAZAS ===
+  - t_offset: 0
+    source: sentinelone_threats
+    type: active_threat
+    vars:
+      computer_name: "{{ victim_host1 }}"
+      threat_name: "{{ threat_name1 }}"
+      file_path: "C:\\\\ProgramData\\\\update_svc.exe"
+      mitigation_mode: "detect"
+      classification: "Trojan"
+
+  - t_offset: 25
+    source: sentinelone_threats
+    type: active_threat
+    vars:
+      computer_name: "{{ victim_host1 }}"
+      threat_name: "{{ threat_name2 }}"
+      file_path: "C:\\\\Windows\\\\Temp\\\\mimikatz.exe"
+      mitigation_mode: "detect"
+      classification: "HackTool"
+
+  - t_offset: 50
+    source: sentinelone_threats
+    type: active_threat
+    vars:
+      computer_name: "{{ victim_host1 }}"
+      threat_name: "{{ threat_name3 }}"
+      file_path: "C:\\\\Users\\\\Public\\\\back.exe"
+      mitigation_mode: "detect"
+      classification: "Backdoor"
+
+  - t_offset: 80
+    source: sentinelone_threats
+    type: active_threat
+    vars:
+      computer_name: "{{ victim_host2 }}"
+      threat_name: "{{ threat_name1 }}"
+      file_path: "C:\\\\Users\\\\Public\\\\Downloads\\\\inv.exe"
+      mitigation_mode: "detect"
+      classification: "Trojan"
+
+  - t_offset: 100
+    source: sentinelone_threats
+    type: active_threat
+    vars:
+      computer_name: "{{ victim_host2 }}"
+      threat_name: "{{ threat_name2 }}"
+      file_path: "C:\\\\Windows\\\\Temp\\\\m.exe"
+      mitigation_mode: "detect"
+      classification: "HackTool"
+
+  # === FASE 2: USB INSERTADO ===
+  - t_offset: 140
+    source: sentinelone_device
+    type: usb_inserted
+    vars:
+      computer_name: "{{ victim_host1 }}"
+      device_name: "TFM Kingston DataTraveler G4 32GB"
+      event_type: "Inserted"
+
+  - t_offset: 170
+    source: sentinelone_device
+    type: usb_inserted
+    vars:
+      computer_name: "{{ victim_host2 }}"
+      device_name: "TFM SanDisk Cruzer Glide"
+      event_type: "Inserted"
+
+  - t_offset: 200
+    source: sentinelone_device
+    type: usb_inserted
+    vars:
+      computer_name: "{{ victim_host1 }}"
+      device_name: "TFM Kingston DataTraveler G4 32GB"
+      event_type: "Inserted"
+
+  - t_offset: 230
+    source: sentinelone_device
+    type: usb_inserted
+    vars:
+      computer_name: "{{ victim_host2 }}"
+      device_name: "TFM SanDisk Cruzer Glide"
+      event_type: "Inserted"
+
+  # === FASE 3: BEACONING C2 (PaloAlto) ===
+  # CRUCE: PaloAlto ve tráfico desde la IP que SentinelOne marca como host comprometido.
+  - t_offset: 280
+    source: paloalto
+    type: threat_event
+    vars:
+      src_ip: "{{ victim_ip1 }}"
+      dst_ip: "{{ c2_ip1 }}"
+      threat_subtype: "url"
+      category: "command-and-control"
+      severity: "high"
+      url: "{{ c2_ip1 }}/api/beacon"
+      action: "alert"
+
+  - t_offset: 300
+    source: paloalto
+    type: traffic_drop
+    repeat: 30
+    repeat_interval: 4
+    vars:
+      src_ip: "{{ victim_ip1 }}"
+      dst_ip: "{{ c2_ip1 }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 443
+      rule_name: "TFM-Block C2 callback"
+
+  - t_offset: 450
+    source: paloalto
+    type: threat_event
+    vars:
+      src_ip: "{{ victim_ip2 }}"
+      dst_ip: "{{ c2_ip2 }}"
+      threat_subtype: "url"
+      category: "command-and-control"
+      severity: "high"
+      url: "{{ c2_ip2 }}/load"
+      action: "alert"
+
+  - t_offset: 470
+    source: paloalto
+    type: traffic_drop
+    repeat: 25
+    repeat_interval: 5
+    vars:
+      src_ip: "{{ victim_ip2 }}"
+      dst_ip: "{{ c2_ip2 }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 8080
+
+  # === FASE 4: ACTIVIDAD vCENTER ===
+  # CRUCE TRIPLE: alguien hace operaciones raras en vCenter sobre esas VMs.
+  - t_offset: 600
+    source: vcenter
+    type: login
+    vars:
+      user: "{{ attacker_user }}"
+      src_ip: "{{ victim_ip1 }}"
+
+  - t_offset: 625
+    source: vcenter
+    type: task
+    vars:
+      user: "{{ attacker_user }}"
+      task_name: "TFM-Create snapshot"
+
+  - t_offset: 650
+    source: vcenter
+    type: task
+    vars:
+      user: "{{ attacker_user }}"
+      task_name: "TFM-Power off virtual machine"
+
+  - t_offset: 675
+    source: vcenter
+    type: task
+    vars:
+      user: "{{ attacker_user }}"
+      task_name: "TFM-Clone virtual machine"
+
+  - t_offset: 700
+    source: vcenter
+    type: task
+    vars:
+      user: "{{ attacker_user }}"
+      task_name: "TFM-Export OVF template"
+
+  - t_offset: 725
+    source: vcenter
+    type: alarm
+    vars:
+      alarm_name: "TFM-Virtual machine disk usage"
+      host: "{{ victim_host1 }}"
+      from_state: "Green"
+      to_state: "Red"
+
+  - t_offset: 745
+    source: vcenter
+    type: alarm
+    vars:
+      alarm_name: "TFM-Host CPU usage"
+      host: "{{ victim_host2 }}"
+      from_state: "Green"
+      to_state: "Yellow"
+
+  - t_offset: 770
+    source: vcenter
+    type: vmotion
+    vars:
+      vm: "{{ victim_host1 }}"
+
+  - t_offset: 800
+    source: vcenter
+    type: logout
+    vars:
+      user: "{{ attacker_user }}"
+      src_ip: "{{ victim_ip1 }}"

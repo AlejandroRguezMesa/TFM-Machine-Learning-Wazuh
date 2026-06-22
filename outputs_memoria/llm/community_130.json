@@ -1,0 +1,87 @@
+{
+  "community_id": 130,
+  "generado": "2026-06-18T23:29:43.362496+00:00",
+  "contexto": {
+    "community_id": 130,
+    "n_filas": 145,
+    "n_alertas_originales": 204,
+    "n_clusters_capa2": 14,
+    "ventana_inicio": "2026-06-18T23:12:32.427000+00:00",
+    "ventana_fin": "2026-06-18T23:17:30.556000+00:00",
+    "duracion_segundos": 298,
+    "nivel_severidad_max": 3,
+    "decoders": [
+      "json"
+    ],
+    "es_cross_source": false,
+    "reglas_top": [
+      {
+        "id": "91545",
+        "n": 77
+      },
+      {
+        "id": "91534",
+        "n": 68
+      }
+    ],
+    "descripciones_reglas": [
+      "Office 365: Secure Token Service (STS) logon events in Azure Active Directory.",
+      "Office 365: Events from an Exchange mailbox audit log for actions that are performed on a single item, such as creating or receiving an email message."
+    ],
+    "usuarios": [
+      "user:user_0018_anonymized",
+      "user:user_0038_anonymized",
+      "user:user_0019_anonymized",
+      "user:user_0007_anonymized",
+      "user:user_0040_anonymized",
+      "user:user_0015_anonymized",
+      "user:user_0006_anonymized",
+      "user:user_0009_anonymized",
+      "user:user_0014_anonymized",
+      "user:user_0047_anonymized"
+    ],
+    "ips": [
+      "ip:62.83.7.41",
+      "ip:212.64.161.47",
+      "ip:212.64.161.48",
+      "ip:85.49.32.10"
+    ],
+    "hosts": [],
+    "mitre_tacticas": [],
+    "mitre_tecnicas": []
+  },
+  "triaje": {
+    "tipo_incidente": "Actividad inusual de autenticación y buzón en Office 365",
+    "severidad": "baja",
+    "es_probablemente_benigno": false,
+    "entidades_clave": [
+      "user:user_0018_anonymized",
+      "user:user_0038_anonymized",
+      "user:user_0019_anonymized",
+      "user:user_0007_anonymized",
+      "user:user_0040_anonymized",
+      "user:user_0015_anonymized",
+      "user:user_0006_anonymized",
+      "user:user_0009_anonymized",
+      "user:user_0014_anonymized",
+      "user:user_0047_anonymized",
+      "ip:62.83.7.41",
+      "ip:212.64.161.47",
+      "ip:212.64.161.48",
+      "ip:85.49.32.10"
+    ],
+    "factores_de_incertidumbre": [
+      "La baja severidad de las reglas (nivel 3) no indica un riesgo inherente en los eventos individuales.",
+      "La agrupación de muchos usuarios podría ser un artefacto del clustering, no necesariamente un ataque coordinado.",
+      "Ausencia de contexto MITRE TTPs para una clasificación más precisa."
+    ],
+    "acciones_recomendadas": [
+      "Revisar los logs detallados de Office 365/Azure AD para los usuarios e IPs involucrados, buscando fallos de autenticación, accesos desde ubicaciones inusuales o actividad anómala en buzones.",
+      "Consultar con el equipo de TI/O365 sobre posibles cambios recientes en la infraestructura o despliegues de aplicaciones que puedan generar esta actividad.",
+      "Correlacionar esta actividad con otras alertas o eventos de seguridad que involucren a los mismos usuarios o IPs en un periodo más amplio."
+    ],
+    "confianza": "media",
+    "resumen_narrativo": "Se ha detectado una comunidad de alertas de baja severidad en Office 365, que involucra a 10 usuarios y 4 IPs distintas en un periodo de 5 minutos. La actividad consiste en eventos de inicio de sesión de Secure Token Service (STS) y auditorías de buzones de Exchange. Aunque la severidad de las reglas es baja, el volumen y la distribución de la actividad sugieren una investigación para descartar actividad anómala o coordinada, o identificar una causa benigna subyacente.",
+    "_modo": "llm"
+  }
+}

@@ -1,0 +1,242 @@
+# Escenario S08 — Bruteforce O365 → acceso → movimiento lateral a vCenter
+#
+# DEMUESTRA: Capa 3 + entity_normalization unen al MISMO usuario aunque
+# su nombre aparezca en formato distinto en O365 y en vCenter.
+#
+# Entidades UNIQUE-TO-SCENARIO:
+#   victim*_o365:  tfm.s08.*@labcorp.com
+#   victim*_ad:    VSPHERE.LOCAL\tfm-s08-*  (normalize.py debe colapsar
+#                  ambas representaciones a user:tfm-s08-*)
+#   attacker_ext_ip*:  94.140.14.14 + 37.220.87.55
+#   internal_*:    10.99.8.x  (subred reservada)
+#
+# VOLUMEN: 3 usuarios víctima, ~105 alertas.
+
+incident_id: INC-S08
+name: "Compromiso identidad O365 con movimiento lateral hasta vCenter"
+
+entities:
+  victim1_o365: "tfm.s08.carlos@labcorp.com"
+  victim2_o365: "tfm.s08.alberto@labcorp.com"
+  victim3_o365: "tfm.s08.maria@labcorp.com"
+  victim1_ad: "VSPHERE.LOCAL\\\\tfm-s08-carlos"
+  victim2_ad: "VSPHERE.LOCAL\\\\tfm-s08-alberto"
+  victim3_ad: "VSPHERE.LOCAL\\\\tfm-s08-maria"
+  attacker_ext_ip: "94.140.14.14"
+  attacker_ext_ip2: "37.220.87.55"
+  attacker_ext_ip3: "146.70.66.11"
+  internal_jumphost: "10.99.8.200"
+  internal_target1: "10.99.8.50"
+  internal_target2: "10.99.8.51"
+
+events:
+  # === FASE 1: PHISHING ===
+  - t_offset: 0
+    source: office365
+    type: phishing_detected
+    vars:
+      recipient: "{{ victim1_o365 }}"
+      sender: "ceo-tfm-s08-spoofed@suspicious.tld"
+      subject: "[TFM-S08] Action needed - verify your credentials"
+
+  - t_offset: 30
+    source: office365
+    type: phishing_detected
+    vars:
+      recipient: "{{ victim2_o365 }}"
+      sender: "ceo-tfm-s08-spoofed@suspicious.tld"
+      subject: "[TFM-S08] Urgent: verify account"
+
+  - t_offset: 60
+    source: office365
+    type: phishing_detected
+    vars:
+      recipient: "{{ victim3_o365 }}"
+      sender: "ceo-tfm-s08-spoofed@suspicious.tld"
+      subject: "[TFM-S08] Security alert"
+
+  # === FASE 2: ACCESO O365 EXITOSO DESDE IP NUEVA ===
+  - t_offset: 130
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim1_o365 }}"
+      client_ip: "{{ attacker_ext_ip }}"
+      country: "UA"
+      risk_state: "atRisk"
+
+  - t_offset: 155
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim2_o365 }}"
+      client_ip: "{{ attacker_ext_ip2 }}"
+      country: "TR"
+      risk_state: "atRisk"
+
+  - t_offset: 180
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim3_o365 }}"
+      client_ip: "{{ attacker_ext_ip3 }}"
+      country: "IR"
+      risk_state: "atRisk"
+
+  # === FASE 3: ACCESO A BUZONES ===
+  - t_offset: 210
+    source: office365
+    type: mail_items_accessed
+    repeat: 15
+    repeat_interval: 5
+    vars:
+      user_id: "{{ victim1_o365 }}"
+      client_ip: "{{ attacker_ext_ip }}"
+      access_type: "Bind"
+
+  - t_offset: 300
+    source: office365
+    type: mail_items_accessed
+    repeat: 12
+    repeat_interval: 5
+    vars:
+      user_id: "{{ victim2_o365 }}"
+      client_ip: "{{ attacker_ext_ip2 }}"
+      access_type: "Bind"
+
+  - t_offset: 370
+    source: office365
+    type: mail_items_accessed
+    repeat: 10
+    repeat_interval: 5
+    vars:
+      user_id: "{{ victim3_o365 }}"
+      client_ip: "{{ attacker_ext_ip3 }}"
+      access_type: "Bind"
+
+  - t_offset: 430
+    source: office365
+    type: new_inbox_rule
+    vars:
+      user_id: "{{ victim1_o365 }}"
+      client_ip: "{{ attacker_ext_ip }}"
+      rule_name: "tfm-s08-auto-fwd-archive"
+      forward_to: "drop@malicious-tfm-archive.tld"
+
+  - t_offset: 450
+    source: office365
+    type: new_inbox_rule
+    vars:
+      user_id: "{{ victim2_o365 }}"
+      client_ip: "{{ attacker_ext_ip2 }}"
+      rule_name: "tfm-s08-quiet"
+      forward_to: "drop@malicious-tfm-archive.tld"
+
+  # === FASE 4: PIVOTE INTERNO (PaloAlto) ===
+  - t_offset: 500
+    source: paloalto
+    type: traffic_drop
+    repeat: 25
+    repeat_interval: 4
+    vars:
+      src_ip: "{{ internal_jumphost }}"
+      dst_ip: "{{ internal_target1 }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 3389
+      rule_name: "TFM-Block internal RDP"
+
+  - t_offset: 620
+    source: paloalto
+    type: traffic_drop
+    repeat: 20
+    repeat_interval: 4
+    vars:
+      src_ip: "{{ internal_jumphost }}"
+      dst_ip: "{{ internal_target2 }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 445
+      rule_name: "TFM-Block SMB lateral"
+
+  # === FASE 5: vCENTER LOGIN CON MISMO USUARIO (CRUCE!) ===
+  # CRUCE: misma identidad O365 (carlos@labcorp) y vCenter (VSPHERE.LOCAL\carlos)
+  # normalize.py debe colapsarlas a user:tfm-s08-carlos
+  - t_offset: 720
+    source: vcenter
+    type: login
+    vars:
+      user: "{{ victim1_ad }}"
+      src_ip: "{{ internal_jumphost }}"
+
+  - t_offset: 750
+    source: vcenter
+    type: task
+    vars:
+      user: "{{ victim1_ad }}"
+      task_name: "TFM-S08 Power on virtual machine"
+
+  - t_offset: 770
+    source: vcenter
+    type: task
+    vars:
+      user: "{{ victim1_ad }}"
+      task_name: "TFM-S08 Reconfigure virtual machine"
+
+  - t_offset: 790
+    source: vcenter
+    type: login
+    vars:
+      user: "{{ victim2_ad }}"
+      src_ip: "{{ internal_jumphost }}"
+
+  - t_offset: 810
+    source: vcenter
+    type: task
+    vars:
+      user: "{{ victim2_ad }}"
+      task_name: "TFM-S08 Add disk to virtual machine"
+
+  - t_offset: 830
+    source: vcenter
+    type: task
+    vars:
+      user: "{{ victim2_ad }}"
+      task_name: "TFM-S08 Clone virtual machine"
+
+  - t_offset: 850
+    source: vcenter
+    type: login
+    vars:
+      user: "{{ victim3_ad }}"
+      src_ip: "{{ internal_jumphost }}"
+
+  - t_offset: 870
+    source: vcenter
+    type: alarm
+    vars:
+      alarm_name: "TFM-S08 Suspicious VM configuration change"
+      host: "vmhost-prod-03"
+      from_state: "Green"
+      to_state: "Red"
+
+  - t_offset: 900
+    source: vcenter
+    type: logout
+    vars:
+      user: "{{ victim1_ad }}"
+      src_ip: "{{ internal_jumphost }}"
+
+  - t_offset: 910
+    source: vcenter
+    type: logout
+    vars:
+      user: "{{ victim2_ad }}"
+      src_ip: "{{ internal_jumphost }}"
+
+  - t_offset: 920
+    source: vcenter
+    type: logout
+    vars:
+      user: "{{ victim3_ad }}"
+      src_ip: "{{ internal_jumphost }}"

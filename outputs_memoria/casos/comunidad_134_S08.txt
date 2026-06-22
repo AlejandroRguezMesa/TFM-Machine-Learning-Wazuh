@@ -1,0 +1,46 @@
+
+========================================================================
+  Comunidad #134
+========================================================================
+
+  decoders:   [json, paloalto, vcenter]
+  reglas:     [140006, 140007, 64508, 91533, 91534, 91545]
+  filas:      20
+  alertas:    97
+  clusters:   6
+
+  ENTIDADES PUENTE (presentes en ≥2 clusters de los 6 de la comunidad):
+      3 clusters ( 50%)     4 filas  user:tfm.s08.carlos [genérica]
+      3 clusters ( 50%)     4 filas  ip:94.140.14.14 [genérica]
+      3 clusters ( 50%)     3 filas  user:tfm.s08.alberto [genérica]
+      3 clusters ( 50%)     3 filas  ip:37.220.87.55 [genérica]
+      2 clusters ( 33%)     2 filas  user:tfm.s08.maria [genérica]
+      2 clusters ( 33%)     2 filas  ip:146.70.66.11 [genérica]
+      2 clusters ( 33%)     9 filas  ip:10.99.8.200 [genérica]
+      2 clusters ( 33%)     3 filas  user:tfm-s08-carlos [genérica]
+      2 clusters ( 33%)     3 filas  user:tfm-s08-alberto [genérica]
+
+  Entidades únicas (solo en 1 cluster): 4
+
+  DESGLOSE POR CLUSTER (top 8)
+
+    cluster 49  (3 filas, 45 alertas, paloalto, reglas 64508)
+      puentes:  ip:10.99.8.200
+      únicas:   host:pa-vm300-01, ip:10.99.8.50, ip:10.99.8.51
+
+    cluster 62  (4 filas, 37 alertas, json, reglas 91534)
+      puentes:  ip:146.70.66.11, ip:37.220.87.55, ip:94.140.14.14, user:tfm.s08.alberto, user:tfm.s08.carlos, user:tfm.s08.maria
+
+    cluster 82  (6 filas, 6 alertas, vcenter, reglas 140007)
+      puentes:  ip:10.99.8.200, user:tfm-s08-alberto, user:tfm-s08-carlos
+      únicas:   user:tfm-s08-maria
+
+    cluster 69  (2 filas, 4 alertas, vcenter, reglas 140006)
+      puentes:  user:tfm-s08-alberto, user:tfm-s08-carlos
+
+    cluster 103  (3 filas, 3 alertas, json, reglas 91545)
+      puentes:  ip:146.70.66.11, ip:37.220.87.55, ip:94.140.14.14, user:tfm.s08.alberto, user:tfm.s08.carlos, user:tfm.s08.maria
+
+    cluster 104  (2 filas, 2 alertas, json, reglas 91533)
+      puentes:  ip:37.220.87.55, ip:94.140.14.14, user:tfm.s08.alberto, user:tfm.s08.carlos
+

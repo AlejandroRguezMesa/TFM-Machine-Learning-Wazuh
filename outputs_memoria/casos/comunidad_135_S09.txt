@@ -1,0 +1,44 @@
+
+========================================================================
+  Comunidad #135
+========================================================================
+
+  decoders:   [json, paloalto]
+  reglas:     [64503, 64508, 91533, 91534, 91545, 91725]
+  filas:      11
+  alertas:    71
+  clusters:   7
+
+  ENTIDADES PUENTE (presentes en ≥2 clusters de los 7 de la comunidad):
+      6 clusters ( 86%)    10 filas  ip:91.198.22.70 [muy genérica]
+      4 clusters ( 57%)     4 filas  user:tfm.s09.lucia [muy genérica]
+      2 clusters ( 29%)     3 filas  user:tfm.s09.pablo [discriminante]
+      2 clusters ( 29%)     4 filas  host:pa-vm300-01 [discriminante]
+
+  Entidades únicas (solo en 1 cluster): 3
+
+  DESGLOSE POR CLUSTER (top 8)
+
+    cluster 49  (3 filas, 55 alertas, paloalto, reglas 64508)
+      puentes:  host:pa-vm300-01, ip:91.198.22.70
+      únicas:   ip:185.100.87.202, ip:45.137.21.230
+
+    cluster 62  (1 filas, 6 alertas, json, reglas 91534)
+      puentes:  ip:91.198.22.70, user:tfm.s09.lucia
+
+    cluster -1  (2 filas, 4 alertas, json, reglas 91534)
+      puentes:  ip:91.198.22.70, user:tfm.s09.pablo
+
+    cluster 59  (1 filas, 2 alertas, paloalto, reglas 64503)
+      puentes:  host:pa-vm300-01, ip:91.198.22.70
+      únicas:   ip:18.197.147.66
+
+    cluster 103  (2 filas, 2 alertas, json, reglas 91545)
+      puentes:  ip:91.198.22.70, user:tfm.s09.lucia, user:tfm.s09.pablo
+
+    cluster 104  (1 filas, 1 alertas, json, reglas 91533)
+      puentes:  ip:91.198.22.70, user:tfm.s09.lucia
+
+    cluster 135  (1 filas, 1 alertas, json, reglas 91725)
+      puentes:  user:tfm.s09.lucia
+

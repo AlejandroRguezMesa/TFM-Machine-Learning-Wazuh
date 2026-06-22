@@ -1,0 +1,46 @@
+
+========================================================================
+  Comunidad #136
+========================================================================
+
+  decoders:   [json, paloalto, vcenter]
+  reglas:     [140006, 140007, 300601, 300602, 300651, 64503, 64508]
+  filas:      15
+  alertas:    77
+  clusters:   6
+
+  ENTIDADES PUENTE (presentes en ≥2 clusters de los 6 de la comunidad):
+      3 clusters ( 50%)     5 filas  ip:10.99.7.49 [genérica]
+      2 clusters ( 33%)     3 filas  host:tfm-srv-db02 [genérica]
+      2 clusters ( 33%)     2 filas  host:tfm-srv-file01 [genérica]
+      2 clusters ( 33%)     5 filas  host:pa-vm300-01 [genérica]
+      2 clusters ( 33%)     2 filas  ip:10.99.7.78 [genérica]
+      2 clusters ( 33%)     4 filas  user:tfm-administrator [genérica]
+      2 clusters ( 33%)     3 filas  host:tfm-ws-s09-01 [genérica]
+
+  Entidades únicas (solo en 1 cluster): 6
+
+  DESGLOSE POR CLUSTER (top 8)
+
+    cluster 49  (3 filas, 55 alertas, paloalto, reglas 64508)
+      puentes:  host:pa-vm300-01, ip:10.99.7.49, ip:10.99.7.78
+      únicas:   ip:78.46.99.123, ip:91.241.19.84
+
+    cluster 135  (4 filas, 8 alertas, json, reglas 300601,300602)
+      puentes:  host:tfm-srv-db02, host:tfm-srv-file01, host:tfm-ws-s09-01
+      únicas:   ip:10.0.5.20, user:user_0094_anonymized
+
+    cluster -1  (2 filas, 6 alertas, json, reglas 300651)
+      puentes:  host:tfm-srv-db02, host:tfm-srv-file01, host:tfm-ws-s09-01
+      únicas:   host:desktop-user037
+
+    cluster 69  (2 filas, 4 alertas, vcenter, reglas 140006)
+      puentes:  user:tfm-administrator
+
+    cluster 59  (2 filas, 2 alertas, paloalto, reglas 64503)
+      puentes:  host:pa-vm300-01, ip:10.99.7.49, ip:10.99.7.78
+      únicas:   ip:18.197.147.66
+
+    cluster 82  (2 filas, 2 alertas, vcenter, reglas 140007)
+      puentes:  ip:10.99.7.49, user:tfm-administrator
+

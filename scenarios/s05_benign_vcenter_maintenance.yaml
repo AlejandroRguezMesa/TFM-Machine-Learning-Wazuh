@@ -1,0 +1,72 @@
+# Escenario S05 — BENIGNO: ventana de mantenimiento vCenter
+#
+# Genera muchos eventos vCenter (logins de cuentas de servicio, tareas,
+# vMotion, alarmas) que SUPERFICIALMENTE parecen "ráfaga sospechosa"
+# pero no constituyen incidente.
+#
+# Hipótesis ML: HDBSCAN puede agruparlos por proximidad temporal y
+# fuente común. Lo importante es que:
+#   (a) en evaluación, este cluster NO esté etiquetado como incidente
+#   (b) el sistema sea capaz de diferenciarlo de S01-S04 por su firma
+#       de severidades (todos level 3) y de tácticas MITRE (ninguna).
+#
+# Este escenario es el control negativo de tu evaluación.
+
+incident_id: INC-S05-benign
+name: "Ventana de mantenimiento programada en vCenter"
+is_benign: true
+
+entities:
+  vsphere_user_1: "VSPHERE.LOCAL\\\\svc-snapcenter"
+  vsphere_user_2: "VSPHERE.LOCAL\\\\svc-vmotion"
+  vsphere_user_3: "VSPHERE.LOCAL\\\\svc-vsc"
+
+events:
+  # Login masivo de servicios
+  - t_offset: 0
+    source: vcenter
+    type: login
+    repeat: 6
+    repeat_interval: 5
+    vars:
+      user: "{{ vsphere_user_1 }}"
+      src_ip: "10.252.11.47"
+
+  - t_offset: 30
+    source: vcenter
+    type: login
+    repeat: 4
+    repeat_interval: 7
+    vars:
+      user: "{{ vsphere_user_3 }}"
+      src_ip: "10.252.11.51"
+
+  # vMotion entre hosts
+  - t_offset: 60
+    source: vcenter
+    type: vmotion
+    repeat: 5
+    repeat_interval: 15
+    vars:
+      vm: "PROD-WEB-{{ randint(1,20) }}"
+
+  # Recompute digest tasks (típico ruido benigno)
+  - t_offset: 150
+    source: vcenter
+    type: task
+    repeat: 8
+    repeat_interval: 4
+    vars:
+      user: "{{ vsphere_user_3 }}"
+      task_name: "Recompute virtual disk digest information"
+
+  # Alarmas verde→amarillo (CPU usage, datastore) en intervalo regular
+  - t_offset: 220
+    source: vcenter
+    type: alarm
+    repeat: 4
+    repeat_interval: 12
+    vars:
+      alarm_name: "Host memory usage"
+      from_state: "Green"
+      to_state: "Yellow"

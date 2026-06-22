@@ -1,0 +1,41 @@
+<!--
+  ossec_localfile_snippet.xml
+  ===========================
+  Bloques <localfile> que el manager de Wazuh debe vigilar para ingerir
+  los logs sinteticos del laboratorio.
+
+  INSTRUCCIONES:
+  Copiar el contenido de este fichero DENTRO del bloque
+  <ossec_config>...</ossec_config> de /var/ossec/etc/ossec.conf
+  y reiniciar el manager:  sudo systemctl restart wazuh-manager
+-->
+
+<localfile>
+  <log_format>syslog</log_format>
+  <location>/var/log/lab/paloalto.log</location>
+</localfile>
+
+<localfile>
+  <log_format>syslog</log_format>
+  <location>/var/log/lab/vcenter.log</location>
+</localfile>
+
+<localfile>
+  <log_format>json</log_format>
+  <location>/var/log/lab/office365.log</location>
+</localfile>
+
+<localfile>
+  <log_format>json</log_format>
+  <location>/var/log/sentinelone.json</location>
+</localfile>
+
+<localfile>
+  <log_format>json</log_format>
+  <location>/var/log/sentinelone_activities.json</location>
+</localfile>
+
+<localfile>
+  <log_format>json</log_format>
+  <location>/var/log/sentinelone-device-control.json</location>
+</localfile>

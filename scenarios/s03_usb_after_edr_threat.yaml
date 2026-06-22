@@ -1,0 +1,49 @@
+# Escenario S03 — Actividad USB tras detección de amenaza por EDR
+#
+# Reglas:
+#   - 300601 (level 10): SentinelOne new active threat
+#   - 300651 (level 3):  SentinelOne device control (USB Inserted)
+#
+# Hipótesis ML: las dos alertas comparten agentComputerName en una
+# ventana muy corta (< 5 min). El clustering debe agruparlas y la
+# capa 3 (entity graph) las eleva a incidente "EDR alert + USB pivot".
+
+incident_id: INC-S03
+name: "Amenaza EDR detectada seguida de inserción de USB en mismo host"
+
+entities:
+  victim_host: "DESKTOP-PROD042"
+  internal_ip: "10.0.5.42"
+  user: "LABCORP\\\\acme.user"
+  threat_file: "mimikatz.exe"
+  threat_path: "C:\\\\Users\\\\Public\\\\Downloads\\\\update.exe"
+
+events:
+  - t_offset: 0
+    source: sentinelone_threats
+    type: active_threat
+    vars:
+      computer_name: "{{ victim_host }}"
+      threat_name: "{{ threat_file }}"
+      file_path: "{{ threat_path }}"
+      user_name: "{{ user }}"
+      mitigation_mode: "detect"
+      classification: "Malware"
+
+  # USB insertado 2 min después en mismo host: posible canal exfil/persistencia
+  - t_offset: 120
+    source: sentinelone_device
+    type: usb_inserted
+    vars:
+      computer_name: "{{ victim_host }}"
+      device_name: "Kingston DataTraveler G4 32GB"
+      event_type: "Inserted"
+
+  # Segunda inserción más adelante (refuerza el patrón)
+  - t_offset: 240
+    source: sentinelone_device
+    type: usb_inserted
+    vars:
+      computer_name: "{{ victim_host }}"
+      device_name: "SanDisk Cruzer Glide"
+      event_type: "Inserted"

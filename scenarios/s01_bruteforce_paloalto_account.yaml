@@ -1,0 +1,56 @@
+# Escenario S01 — Fuerza bruta dirigida contra cuenta de servicio Palo Alto
+#
+# Objetivo: encadenar varios audit_failure (rule 60104) en Windows con
+# targetUserName=svc-paloalto. La regla custom 100016 (level 12) hace
+# match específico para esa cuenta. En paralelo, el firewall registra
+# múltiples sesiones DROP desde la misma IP origen externa.
+#
+# Hipótesis ML: HDBSCAN debe agrupar las alertas 100016 y 64508 por
+# proximidad temporal + entidad compartida (la IP origen interna del DC).
+
+incident_id: INC-S01
+name: "Bruteforce dirigido contra svc-paloalto + drops perimetrales"
+description: >
+  Atacante intenta múltiples passwords contra una cuenta de servicio
+  privilegiada. En paralelo, su pivote interno provoca drops en el FW.
+
+entities:
+  src_ip_attacker: "10.252.1.180"   # IP interna comprometida (asumimos pivote)
+  dst_ip_dc: "10.252.1.10"          # Domain Controller
+  target_user: "svc-paloalto"
+  hostname_dc: "DC01"
+
+events:
+  # Volley de drops en el FW (mismo src_ip → distintos dst_ip externos)
+  - t_offset: 0
+    source: paloalto
+    type: traffic_drop
+    repeat: 8
+    repeat_interval: 4   # segundos entre repeticiones
+    vars:
+      src_ip: "{{ src_ip_attacker }}"
+      dst_ip: "192.168.12.{{ randint(100,200) }}"
+      action: "drop"
+      rule_name: "Drop trafico interno Lab"
+
+  # En medio del ataque, intentos de auth fallidos al DC contra svc-paloalto
+  # (estos generarían 60104 → 100016 si tuvieras agente Windows en el DC).
+  # Como no tenemos agente Windows en el lab, simulamos solo los drops y
+  # opcionalmente activas en la VM un par de generadores de eventos win.
+  # Si más adelante añades agente Windows, descomenta el bloque siguiente.
+  #
+  # - t_offset: 5
+  #   source: windows_security
+  #   type: audit_failure_paloalto_acct
+  #   repeat: 5
+  #   repeat_interval: 2
+
+  - t_offset: 35
+    source: paloalto
+    type: traffic_drop
+    repeat: 12
+    repeat_interval: 3
+    vars:
+      src_ip: "{{ src_ip_attacker }}"
+      dst_ip: "192.168.12.{{ randint(100,200) }}"
+      action: "drop"

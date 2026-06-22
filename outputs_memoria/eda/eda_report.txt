@@ -1,0 +1,245 @@
+
+========================================================================
+  INFORME EDA: alerts.json
+========================================================================
+Total líneas leídas: 929,893
+Errores de parseo:   0
+Errores de encoding (lineas descartadas): 106  ⚠ revisa la fuente
+Timespan: 2026-05-25T00:00:01.391+0000 → 2026-05-26T00:00:00.319+0000
+
+--- Top 20 decoders ---
+     814,937  paloalto
+      45,693  vcenter
+      39,294  json
+      17,792  windows_eventchannel
+      10,338  syscheck_registry_value_modified
+         690  web-accesslog
+         686  syscheck_registry_key_modified
+         146  ?
+         115  syscheck_registry_value_deleted
+          95  syscheck_registry_value_added
+          48  auditd
+          22  syscheck_registry_key_deleted
+          19  ossec
+           9  pam
+           4  syscheck_new_entry
+           3  sshd
+           1  unix_chkpwd
+           1  sudo
+
+--- Distribución de niveles de regla ---
+  level 3:     103,306
+  level 4:       1,203
+  level 5:      26,349
+  level 6:     798,810
+  level 9:           4
+  level 10:         221
+
+--- Top 30 reglas (rule.id, descripción) ---
+     134,212  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 192.168.9.1 to 8.8.8.8. 
+     130,403  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 192.168.9.1 to 208.67.22
+      94,873  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-01 from 192.168.9.1 to 8.8.8.8. 
+      94,338  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-01 from 192.168.9.1 to 208.67.22
+      43,104  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 192.168.9.25 to 165.154.
+      35,914  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 10.252.1.49 to 8.8.8.8. 
+      29,814  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-01 from 192.168.9.25 to 165.154.
+      24,030  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-01 from 10.252.1.49 to 8.8.8.8. 
+      20,666  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 172.16.232.90 to 172.16.
+      15,542  rule=64502   Palo Alto THREAT: medium event.
+      14,409  rule=60137   Windows User Logoff
+      14,268  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-01 from 172.16.232.90 to 172.16.
+      14,182  rule=140007  vCenter [vpxd] [info] [vim.event.UserLogoutSessionEvent] User VSPHERE.LOCAL\svc-
+      12,999  rule=91578   Office 365: Events related to the MailItemsAccessed mailbox auditing action.
+      10,380  rule=140007  vCenter [vpxd] [info] [vim.event.UserLoginSessionEvent] User VSPHERE.LOCAL\svc-h
+      10,324  rule=750     Registry Value Integrity Checksum Changed
+      10,195  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 192.168.9.21 to 8.8.8.8.
+      10,105  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 192.168.9.21 to 8.8.4.4.
+       7,682  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 192.168.1.30 to 192.168.
+       7,578  rule=140006  vCenter [vpxd] [info] [vim.event.TaskEvent] Task: Recompute virtual disk digest
+       7,052  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-01 from 192.168.9.21 to 8.8.8.8.
+       6,991  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-01 from 192.168.9.21 to 8.8.4.4.
+       6,271  rule=91532   Office 365: MicrosoftTodo TaskUpdated operation.
+       5,315  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-01 from 192.168.1.30 to 192.168.
+       5,097  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 192.168.10.60 to 192.168
+       4,664  rule=91534   Office 365: Events from an Exchange mailbox audit log for actions that are perfo
+       4,404  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 192.168.9.5 to 8.8.4.4. 
+       3,929  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 172.16.232.90 to 10.252.
+       3,707  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-02 from 192.168.9.13 to 8.8.8.8.
+       3,520  rule=64508   Palo Alto Traffic: Session dropped  on PA-VM300-01 from 192.168.10.60 to 192.168
+
+--- Top 25 grupos de regla ---
+     814,937  paloalto
+      45,693  vcenter
+      39,291  office365
+      32,625  user
+      17,792  windows
+      14,767  windows_security
+      12,999  ExchangeItemAggregated
+      11,279  ossec
+      11,260  syscheck
+      11,256  syscheck_registry
+      11,024  syscheck_entry_modified
+       8,514  task
+       4,664  ExchangeItem
+       2,003  MicrosoftTeams
+       1,985  ExchangeItemGroup
+       1,818  AzureActiveDirectoryStsLogon
+       1,727  SharePointFileOperation
+       1,455  general
+       1,427   WEF
+       1,232  alarm
+         996  Exchange
+         869  windows_application
+         832  vm
+         729  drs
+         690  web
+
+--- MITRE tactics ---
+     798,855  Initial Access
+     798,748  Lateral Movement
+     798,458  Execution
+      11,654  Defense Evasion
+      11,421  Impact
+       1,152  Collection
+         405  Persistence
+         398  Privilege Escalation
+           5  Credential Access
+
+--- Top 15 locations ---
+     474,562  10.19.71.6
+     340,375  10.19.71.5
+      46,163  10.252.11.21
+      39,291  office365
+      17,792  EventChannel
+      11,260  syscheck
+         220  /var/log/apache2/access.log
+         158  journald
+          48  /var/log/audit/audit.log
+          14  netstat listening ports
+           5  logcollector
+           2  /var/log/apache2/error.log
+           2  /var/log/sentinelone_activities.json
+           1  /var/log/sentinelone.json
+
+--- ANÁLISIS DE REPETICIÓN (deduplicación potencial) ---
+Claves únicas (decoder, rule.id, src, dst, user): 3,882
+  claves con 1 sola alerta:     1,133
+  claves repetidas:             2,749
+  alertas redundantes:          926,011 (99.6%)
+  Reducción esperada con dedup: ~100%
+
+Top 15 claves más repetidas:
+     229,085  dec=paloalto     rule=64508   src=192.168.9.1 dst=8.8.8.8 user=
+     224,741  dec=paloalto     rule=64508   src=192.168.9.1 dst=208.67.222.222 user=
+      59,944  dec=paloalto     rule=64508   src=10.252.1.49 dst=8.8.8.8 user=
+      17,468  dec=paloalto     rule=64508   src=172.16.232.90 dst=172.16.10.30 user=
+      17,466  dec=paloalto     rule=64508   src=172.16.232.90 dst=172.16.10.31 user=
+      17,247  dec=paloalto     rule=64508   src=192.168.9.21 dst=8.8.8.8 user=
+      17,096  dec=paloalto     rule=64508   src=192.168.9.21 dst=8.8.4.4 user=
+      14,540  dec=vcenter      rule=140007  src= dst= user=VSPHERE.LOCAL\svc-horizon
+      14,409  dec=windows_eventchannel rule=60137   src= dst= user=
+      12,997  dec=paloalto     rule=64508   src=192.168.1.30 dst=192.168.40.160 user=
+      10,292  dec=syscheck_registry_value_modified rule=750     src= dst= user=
+       9,218  dec=paloalto     rule=64508   src=192.168.9.25 dst=165.154.165.177 user=
+       8,617  dec=paloalto     rule=64508   src=192.168.10.60 dst=192.168.10.1 user=
+       7,860  dec=paloalto     rule=64508   src=192.168.9.5 dst=8.8.4.4 user=
+       7,781  dec=vcenter      rule=140006  src= dst= user=VSPHERE.LOCAL\svc-horizon
+
+--- CAMPOS data.* POBLADOS POR DECODER (top 12 por dec) ---
+
+  decoder=paloalto  (total=814,937)
+        814,937  data.receive_time
+        814,937  data.serial_number
+        814,937  data.type
+        814,937  data.generated_time
+        814,937  data.sequence_number
+        814,937  data.action_flags
+        814,937  data.device_group_hierarchy_level_1
+        814,937  data.device_group_hierarchy_level_2
+        814,937  data.device_group_hierarchy_level_3
+        814,937  data.device_group_hierarchy_level_4
+        814,937  data.device_name
+        814,937  data.high_resolution_timestamp
+
+  decoder=vcenter  (total=45,693)
+         45,693  data.type
+         45,693  data.pid
+         45,693  data.event_id
+         45,693  data.event_index
+         45,693  data.event_timestamp
+         45,693  data.class_name
+         45,693  data.event_level
+         45,693  data.description
+         41,697  data.vc_user
+
+  decoder=json  (total=39,294)
+         39,291  data.integration
+         39,291  data.office365
+              3  data.id
+              2  data.accountId
+              2  data.accountName
+              2  data.activityType
+              2  data.activityUuid
+              2  data.agentId
+              2  data.agentUpdatedVersion
+              2  data.comments
+              2  data.createdAt
+              2  data.description
+
+  decoder=windows_eventchannel  (total=17,792)
+         17,792  data.win
+
+  decoder=syscheck_registry_value_modified  (total=10,338)
+
+  decoder=web-accesslog  (total=690)
+            690  data.protocol
+            690  data.srcip
+            690  data.id
+            690  data.url
+            470  data.srcip2
+
+  decoder=syscheck_registry_key_modified  (total=686)
+
+  decoder=?  (total=146)
+
+  decoder=syscheck_registry_value_deleted  (total=115)
+
+  decoder=syscheck_registry_value_added  (total=95)
+
+--- CARDINALIDAD DE ENTIDADES POR DECODER ---
+
+  decoder=paloalto
+     src_ip     valores únicos:    435  top3: 192.168.9.1(453826), 192.168.9.25(86199), 10.252.1.49(59944)
+     dst_ip     valores únicos:  1,774  top3: 8.8.8.8(318709), 208.67.222.222(224753), 8.8.4.4(27114)
+     host       valores únicos:      2  top3: PA-VM300-02(474542), PA-VM300-01.labcorp.local(340375)
+
+  decoder=vcenter
+     user       valores únicos:     41  top3: VSPHERE.LOCAL\svc-horizon(22693), VSPHERE.LOCAL\svc-horizon.user_0095_anonymized(3477), root(3368)
+
+  decoder=json
+     src_ip     valores únicos:    602  top3: 212.64.161.47(11376), NA(7131), 20.86.93.33(1929)
+     user       valores únicos:    199  top3: user_0096_anonymized@labcorp.com(4489), 4e5e4c82-9a4e-4222-a136-18f7cd2cae3a(3397), user_0097_anonymized@labcorp.com(2943)
+     host       valores únicos:      1  top3: F811(1)
+
+  decoder=windows_eventchannel
+
+  decoder=syscheck_registry_value_modified
+
+  decoder=web-accesslog
+     src_ip     valores únicos:    472  top3: 212.64.161.47(219), 2026-05-25T01:06:14.334198+01:00(1), 2026-05-25T02:36:46.871911+01:00(1)
+
+  decoder=syscheck_registry_key_modified
+
+  decoder=?
+     host       valores únicos:      1  top3: portalcliente(144)
+
+  decoder=syscheck_registry_value_deleted
+
+  decoder=syscheck_registry_value_added
+
+========================================================================
+  RECOMENDACIONES
+========================================================================
+  - La regla dominante es 64508 con 134,212 alertas.
+  - >50% de las alertas son redundantes. Aplica dedup antes de clusterizar.
+  - Volumen alto (929,893). Tras dedup, clustering en 3,882 alertas.

@@ -1,0 +1,35 @@
+
+========================================================================
+  Comunidad #69
+========================================================================
+
+  decoders:   [json]
+  reglas:     [91534, 91578, 91594, 91707]
+  filas:      6
+  alertas:    6
+  clusters:   5
+
+  ENTIDADES PUENTE (presentes en ≥2 clusters de los 5 de la comunidad):
+      5 clusters (100%)     6 filas  user:user_0093_anonymized [muy genérica]
+      4 clusters ( 80%)     5 filas  ip:212.64.161.47 [muy genérica]
+
+  Entidades únicas (solo en 1 cluster): 1
+
+  DESGLOSE POR CLUSTER (top 8)
+
+    cluster 163  (2 filas, 2 alertas, json, reglas 91578)
+      puentes:  ip:212.64.161.47, user:user_0093_anonymized
+
+    cluster 2  (1 filas, 1 alertas, json, reglas 91707)
+      puentes:  ip:212.64.161.47, user:user_0093_anonymized
+
+    cluster 52  (1 filas, 1 alertas, json, reglas 91534)
+      puentes:  ip:212.64.161.47, user:user_0093_anonymized
+
+    cluster 145  (1 filas, 1 alertas, json, reglas 91594)
+      puentes:  ip:212.64.161.47, user:user_0093_anonymized
+
+    cluster 170  (1 filas, 1 alertas, json, reglas 91578)
+      puentes:  user:user_0093_anonymized
+      únicas:   ip:88.24.91.160
+

@@ -1,0 +1,56 @@
+# Escenario S04 — Beaconing C2 detectado por PA + amenaza EDR en endpoint
+#
+# Reglas: traffic THREAT (URL/category command-and-control) + 300601 EDR
+#
+# Hipótesis ML: las alertas se relacionan por la IP/host:
+#   El endpoint EDR víctima tiene IP 10.0.5.42 — el firewall registra
+#   tráfico saliente desde esa misma IP a un C2 conocido en RU/CN.
+#   El entity graph las une por src_ip.
+
+incident_id: INC-S04
+name: "Endpoint comprometido con beaconing C2 hacia infraestructura externa"
+
+entities:
+  victim_host: "SRV-FILE01"
+  internal_ip: "10.252.1.49"
+  c2_ip: "91.241.19.84"
+  threat: "Trojan.GenericKD.45123"
+
+events:
+  # EDR detecta el dropper
+  - t_offset: 0
+    source: sentinelone_threats
+    type: active_threat
+    vars:
+      computer_name: "{{ victim_host }}"
+      threat_name: "{{ threat }}"
+      file_path: "C:\\\\ProgramData\\\\update_svc.exe"
+      mitigation_mode: "detect"
+      classification: "Trojan"
+
+  # Beaconing periódico — sesiones cortas a la misma IP cada ~30s
+  - t_offset: 60
+    source: paloalto
+    type: traffic_drop
+    repeat: 10
+    repeat_interval: 30
+    vars:
+      src_ip: "{{ internal_ip }}"
+      dst_ip: "{{ c2_ip }}"
+      dst_port: 443
+      action: "drop"
+      rule_name: "Drop C2 known indicators"
+      protocol: "tcp"
+
+  # Una intentona "decryption" THREAT (categoría command-and-control)
+  - t_offset: 90
+    source: paloalto
+    type: threat_event
+    vars:
+      src_ip: "{{ internal_ip }}"
+      dst_ip: "{{ c2_ip }}"
+      threat_subtype: "url"
+      category: "command-and-control"
+      severity: "high"
+      url: "{{ c2_ip }}/api/beacon"
+      action: "alert"

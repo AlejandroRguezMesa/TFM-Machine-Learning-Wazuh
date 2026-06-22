@@ -1,0 +1,249 @@
+# Escenario S06 — Compromiso O365 → tráfico C2 cross-source O365↔PaloAlto
+#
+# DEMUESTRA: Capa 3 conectando alertas Office 365 y PaloAlto por
+# la IP del atacante (entidad puente única en el dataset).
+#
+# Entidades UNIQUE-TO-SCENARIO (no aparecen en el fondo real):
+#   attacker_ip:   185.220.101.45  (TOR exit, único en el lab)
+#   victims:       tfm.s06.victim*  (prefijo único)
+#   pivots:        10.99.6.x        (subred reservada para escenarios)
+#
+# El prefijo "tfm." en usuarios y la subred 10.99/16 garantizan que NO
+# colisionan con el fondo de alerts_filtrado.json del entorno real.
+#
+# VOLUMEN: 4 víctimas, ~100 alertas emitidas (3-5x más que la v1).
+
+incident_id: INC-S06
+name: "Compromiso O365 con beaconing C2 cross-fuente (4 víctimas)"
+
+entities:
+  victim1: "tfm.s06.victim1@labcorp.com"
+  victim2: "tfm.s06.victim2@labcorp.com"
+  victim3: "tfm.s06.victim3@labcorp.com"
+  victim4: "tfm.s06.victim4@labcorp.com"
+  attacker_ip: "185.220.101.45"
+  attacker_ip2: "194.150.168.79"
+  attacker_email: "ceo-tfm-impostor@spoofed-tfm.tld"
+  forward_to: "tfm-exfil@malicious-tfm.tld"
+  internal_pivot1: "10.99.6.180"
+  internal_pivot2: "10.99.6.181"
+  internal_pivot3: "10.99.6.182"
+
+events:
+  # === FASE 1: PHISHING (4 víctimas, 1 minuto) ===
+  - t_offset: 0
+    source: office365
+    type: phishing_detected
+    vars:
+      recipient: "{{ victim1 }}"
+      sender: "{{ attacker_email }}"
+      subject: "URGENT: Wire transfer approval needed [TFM-S06]"
+
+  - t_offset: 20
+    source: office365
+    type: phishing_detected
+    vars:
+      recipient: "{{ victim2 }}"
+      sender: "{{ attacker_email }}"
+      subject: "Invoice review required [TFM-S06]"
+
+  - t_offset: 40
+    source: office365
+    type: phishing_detected
+    vars:
+      recipient: "{{ victim3 }}"
+      sender: "{{ attacker_email }}"
+      subject: "Security alert - verify your account [TFM-S06]"
+
+  - t_offset: 60
+    source: office365
+    type: phishing_detected
+    vars:
+      recipient: "{{ victim4 }}"
+      sender: "{{ attacker_email }}"
+      subject: "Quarterly report [TFM-S06]"
+
+  # === FASE 2: LOGINS DESDE IP MALICIOSA ===
+  - t_offset: 120
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim1 }}"
+      client_ip: "{{ attacker_ip }}"
+      country: "RU"
+      risk_state: "atRisk"
+
+  - t_offset: 140
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim2 }}"
+      client_ip: "{{ attacker_ip }}"
+      country: "RU"
+      risk_state: "atRisk"
+
+  - t_offset: 160
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim3 }}"
+      client_ip: "{{ attacker_ip2 }}"
+      country: "CN"
+      risk_state: "atRisk"
+
+  - t_offset: 180
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim4 }}"
+      client_ip: "{{ attacker_ip2 }}"
+      country: "CN"
+      risk_state: "atRisk"
+
+  # === FASE 3: ACCESO A BUZONES (volumen alto) ===
+  - t_offset: 200
+    source: office365
+    type: mail_items_accessed
+    repeat: 12
+    repeat_interval: 4
+    vars:
+      user_id: "{{ victim1 }}"
+      client_ip: "{{ attacker_ip }}"
+      access_type: "Bind"
+
+  - t_offset: 260
+    source: office365
+    type: mail_items_accessed
+    repeat: 12
+    repeat_interval: 4
+    vars:
+      user_id: "{{ victim2 }}"
+      client_ip: "{{ attacker_ip }}"
+      access_type: "Bind"
+
+  - t_offset: 320
+    source: office365
+    type: mail_items_accessed
+    repeat: 10
+    repeat_interval: 5
+    vars:
+      user_id: "{{ victim3 }}"
+      client_ip: "{{ attacker_ip2 }}"
+      access_type: "Bind"
+
+  - t_offset: 380
+    source: office365
+    type: mail_items_accessed
+    repeat: 10
+    repeat_interval: 5
+    vars:
+      user_id: "{{ victim4 }}"
+      client_ip: "{{ attacker_ip2 }}"
+      access_type: "Bind"
+
+  # === FASE 4: PERSISTENCIA ===
+  - t_offset: 440
+    source: office365
+    type: new_inbox_rule
+    vars:
+      user_id: "{{ victim1 }}"
+      client_ip: "{{ attacker_ip }}"
+      rule_name: "tfm-fwd-external-archive"
+      forward_to: "{{ forward_to }}"
+
+  - t_offset: 460
+    source: office365
+    type: new_inbox_rule
+    vars:
+      user_id: "{{ victim2 }}"
+      client_ip: "{{ attacker_ip }}"
+      rule_name: "tfm-auto-archive-rule"
+      forward_to: "{{ forward_to }}"
+
+  - t_offset: 480
+    source: office365
+    type: new_inbox_rule
+    vars:
+      user_id: "{{ victim3 }}"
+      client_ip: "{{ attacker_ip2 }}"
+      rule_name: "tfm-quiet-rule"
+      forward_to: "{{ forward_to }}"
+
+  # === FASE 5: ESCALADA ===
+  - t_offset: 520
+    source: office365
+    type: add_mailbox_full_access
+    vars:
+      user_id: "{{ victim1 }}"
+      target_mailbox: "tfm-ceo@labcorp.com"
+
+  - t_offset: 540
+    source: office365
+    type: add_mailbox_full_access
+    vars:
+      user_id: "{{ victim2 }}"
+      target_mailbox: "tfm-cfo@labcorp.com"
+
+  # === FASE 6: BEACONING C2 (PaloAlto) ===
+  # CRUCE: tráfico desde IPs internas hacia la MISMA IP del atacante O365.
+  - t_offset: 600
+    source: paloalto
+    type: threat_event
+    vars:
+      src_ip: "{{ internal_pivot1 }}"
+      dst_ip: "{{ attacker_ip }}"
+      threat_subtype: "url"
+      category: "command-and-control"
+      severity: "high"
+      url: "{{ attacker_ip }}/api/c2/checkin"
+      action: "alert"
+
+  - t_offset: 620
+    source: paloalto
+    type: traffic_drop
+    repeat: 25
+    repeat_interval: 4
+    vars:
+      src_ip: "{{ internal_pivot1 }}"
+      dst_ip: "{{ attacker_ip }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 443
+      rule_name: "TFM-Block known C2"
+
+  - t_offset: 740
+    source: paloalto
+    type: threat_event
+    vars:
+      src_ip: "{{ internal_pivot2 }}"
+      dst_ip: "{{ attacker_ip2 }}"
+      threat_subtype: "url"
+      category: "command-and-control"
+      severity: "high"
+      url: "{{ attacker_ip2 }}/beacon"
+      action: "alert"
+
+  - t_offset: 760
+    source: paloalto
+    type: traffic_drop
+    repeat: 20
+    repeat_interval: 5
+    vars:
+      src_ip: "{{ internal_pivot2 }}"
+      dst_ip: "{{ attacker_ip2 }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 8443
+      rule_name: "TFM-Block known C2"
+
+  - t_offset: 870
+    source: paloalto
+    type: traffic_drop
+    repeat: 15
+    repeat_interval: 6
+    vars:
+      src_ip: "{{ internal_pivot3 }}"
+      dst_ip: "{{ attacker_ip }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 443

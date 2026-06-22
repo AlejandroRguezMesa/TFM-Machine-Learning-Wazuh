@@ -1,0 +1,115 @@
+{
+  "community_id": 134,
+  "generado": "2026-06-18T23:30:28.951022+00:00",
+  "contexto": {
+    "community_id": 134,
+    "n_filas": 13,
+    "n_alertas_originales": 78,
+    "n_clusters_capa2": 6,
+    "ventana_inicio": "2026-06-18T23:16:18.493000+00:00",
+    "ventana_fin": "2026-06-18T23:26:24.603000+00:00",
+    "duracion_segundos": 606,
+    "nivel_severidad_max": 10,
+    "decoders": [
+      "json",
+      "paloalto",
+      "vcenter"
+    ],
+    "es_cross_source": true,
+    "reglas_top": [
+      {
+        "id": "300651",
+        "n": 3
+      },
+      {
+        "id": "300601",
+        "n": 2
+      },
+      {
+        "id": "64503",
+        "n": 2
+      },
+      {
+        "id": "64508",
+        "n": 2
+      },
+      {
+        "id": "140007",
+        "n": 2
+      },
+      {
+        "id": "140006",
+        "n": 1
+      },
+      {
+        "id": "300602",
+        "n": 1
+      }
+    ],
+    "descripciones_reglas": [
+      "Palo Alto THREAT: high event.",
+      "SentinelOne Device: Device Logitech USB Receiver via USB was Ejected on DESKTOP-USER025 at 2026-06-19T00:16:17.425Z — Event ID: 163794741.",
+      "SentinelOne: New active threat TFM-Backdoor.Generic detected on TFM-SRV-FILE01.",
+      "SentinelOne Device: Device TFM Kingston DataTraveler G4 32GB via USB was Inserted on TFM-SRV-FILE01 at 2026-06-19T00:17:09.453Z — Event ID: 340225075.",
+      "Palo Alto Traffic: Session dropped  on PA-VM300-01 from 10.99.7.49 to 91.241.19.84. Reason: policy-deny. Action: drop.",
+      "Palo Alto Traffic: Session dropped  on PA-VM300-01 from 10.99.7.78 to 78.46.99.123. Reason: policy-deny. Action: drop."
+    ],
+    "usuarios": [
+      "user:user_0063_anonymized",
+      "user:user_0058_anonymized"
+    ],
+    "ips": [
+      "ip:10.99.7.49",
+      "ip:10.0.5.20",
+      "ip:18.197.147.66",
+      "ip:10.99.7.78",
+      "ip:91.241.19.84",
+      "ip:78.46.99.123"
+    ],
+    "hosts": [
+      "host:pa-vm300-01",
+      "host:tfm-srv-file01",
+      "host:tfm-ws-s09-01",
+      "host:tfm-srv-db02",
+      "host:desktop-user025",
+      "host:desktop-user008"
+    ],
+    "mitre_tacticas": [
+      "Execution",
+      "Lateral Movement",
+      "Initial Access"
+    ],
+    "mitre_tecnicas": [
+      "Software Deployment Tools",
+      "Exploit Public-Facing Application"
+    ]
+  },
+  "triaje": {
+    "tipo_incidente": "Compromiso de servidor con backdoor y posible exfiltración/C2",
+    "severidad": "critica",
+    "es_probablemente_benigno": false,
+    "entidades_clave": [
+      "host:tfm-srv-file01",
+      "TFM-Backdoor.Generic",
+      "ip:91.241.19.84",
+      "ip:78.46.99.123",
+      "host:desktop-user025",
+      "user:user_0063_anonymized",
+      "user:user_0058_anonymized"
+    ],
+    "factores_de_incertidumbre": [
+      "La relación exacta entre la actividad USB en 'desktop-user025' y el compromiso de 'tfm-srv-file01' no está completamente clara.",
+      "La descripción específica del 'Palo Alto THREAT: high event' (regla 300651) no se detalla, lo que impide entender su naturaleza exacta.",
+      "No se conoce el vector de acceso inicial que llevó a la inserción del USB o la detección del backdoor si no fue el USB."
+    ],
+    "acciones_recomendadas": [
+      "Aislar 'tfm-srv-file01' de la red y comenzar un análisis forense exhaustivo para determinar el alcance del compromiso.",
+      "Investigar el origen y la naturaleza de la amenaza 'TFM-Backdoor.Generic' y la inserción del dispositivo USB en 'tfm-srv-file01'.",
+      "Analizar la actividad del usuario en 'desktop-user025' y los logs relacionados con la expulsión del dispositivo USB.",
+      "Bloquear las IPs externas '91.241.19.84' y '78.46.99.123' en el perímetro y buscar cualquier otra conexión o actividad relacionada."
+    ],
+    "confianza": "alta",
+    "resumen_narrativo": "Se ha detectado un incidente crítico que involucra un backdoor confirmado ('TFM-Backdoor.Generic') en un servidor de archivos ('tfm-srv-file01'), posiblemente iniciado mediante la inserción de un dispositivo USB. Concomitantemente, se reportó un evento de amenaza de alta severidad por Palo Alto, y se bloquearon intentos de comunicación con IPs externas sospechosas. Es crucial aislar el servidor comprometido y realizar un análisis forense para determinar el alcance total del incidente y la relación con la actividad USB en otra estación de trabajo.",
+    "_modo": "llm"
+  }
+}

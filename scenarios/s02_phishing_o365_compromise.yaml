@@ -1,0 +1,69 @@
+# Escenario S02 — Compromiso O365: phishing → login sospechoso →
+#                  acceso a buzón → creación inbox rule → permisos FullAccess
+#
+# Reglas que debería disparar:
+#   - 91556 (level 6): phishing detectado por Defender (RecordType 28)
+#   - 91545 (level 3): STS logon
+#   - 91578 (level 5): MailItemsAccessed
+#   - 91725 (level 7): FullAccess en Exchange (custom)
+#
+# Hipótesis ML: las 4-5 alertas comparten el mismo user_id ('victim').
+# El cluster ideal incluye TODAS las alertas con ese UserId en ventana de 10 min.
+
+incident_id: INC-S02
+name: "Compromiso O365 dirigido a usuario VIP"
+
+entities:
+  victim_user: "lab.user2@labcorp.com"
+  attacker_ip_geo: "185.220.101.45"     # IP TOR / país RU
+  internal_ip: "212.64.161.47"          # IP corporativa habitual del user
+  attacker_email: "ceo-impostor@spoofed.tld"
+  forward_to: "exfil@malicious.tld"
+
+events:
+  - t_offset: 0
+    source: office365
+    type: phishing_detected
+    vars:
+      recipient: "{{ victim_user }}"
+      sender: "{{ attacker_email }}"
+      subject: "URGENT: Wire transfer approval needed"
+
+  # Login sospechoso desde IP fuera de patrón habitual (TOR/RU)
+  - t_offset: 320
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim_user }}"
+      client_ip: "{{ attacker_ip_geo }}"
+      country: "RU"
+      risk_state: "atRisk"
+
+  # Acceso al buzón inmediato (sync masivo)
+  - t_offset: 380
+    source: office365
+    type: mail_items_accessed
+    repeat: 4
+    repeat_interval: 8
+    vars:
+      user_id: "{{ victim_user }}"
+      client_ip: "{{ attacker_ip_geo }}"
+      access_type: "Bind"
+
+  # Creación de regla de reenvío externo (clásico de BEC)
+  - t_offset: 460
+    source: office365
+    type: new_inbox_rule
+    vars:
+      user_id: "{{ victim_user }}"
+      client_ip: "{{ attacker_ip_geo }}"
+      rule_name: "fwd-external-archive"
+      forward_to: "{{ forward_to }}"
+
+  # Escalada: concede FullAccess al CEO
+  - t_offset: 540
+    source: office365
+    type: add_mailbox_full_access
+    vars:
+      user_id: "{{ victim_user }}"
+      target_mailbox: "ceo@labcorp.com"

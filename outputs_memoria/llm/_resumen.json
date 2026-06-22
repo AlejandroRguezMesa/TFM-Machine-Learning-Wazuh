@@ -1,0 +1,70 @@
+{
+  "modo": "LLM (gemini) — run final 19 jun 2026 con anonimización",
+  "generado": "2026-06-18T23:31:21.370955+00:00",
+  "comunidades": [
+    {
+      "community_id": 1,
+      "severidad": "informativa",
+      "tipo_incidente": "Actividad de gestión rutinaria en vCenter",
+      "es_probablemente_benigno": true,
+      "confianza": "alta",
+      "fichero": "community_1.json"
+    },
+    {
+      "community_id": 7,
+      "severidad": "baja",
+      "tipo_incidente": "Actividad de Office 365 con posible recolección de información",
+      "es_probablemente_benigno": false,
+      "confianza": "baja",
+      "fichero": "community_7.json"
+    },
+    {
+      "community_id": 126,
+      "severidad": "media",
+      "tipo_incidente": "Escalada de privilegios exitosa",
+      "es_probablemente_benigno": false,
+      "confianza": "media",
+      "fichero": "community_126.json"
+    },
+    {
+      "community_id": 127,
+      "severidad": "alta",
+      "tipo_incidente": "Escalada de privilegios en O365 y actividad de red sospechosa",
+      "es_probablemente_benigno": false,
+      "confianza": "media",
+      "fichero": "community_127.json"
+    },
+    {
+      "community_id": 130,
+      "severidad": "baja",
+      "tipo_incidente": "Actividad inusual de autenticación y buzón en Office 365",
+      "es_probablemente_benigno": false,
+      "confianza": "media",
+      "fichero": "community_130.json"
+    },
+    {
+      "community_id": 134,
+      "severidad": "critica",
+      "tipo_incidente": "Compromiso de servidor con backdoor y posible exfiltración/C2",
+      "es_probablemente_benigno": false,
+      "confianza": "alta",
+      "fichero": "community_134.json"
+    },
+    {
+      "community_id": 135,
+      "severidad": "alta",
+      "tipo_incidente": "Posible compromiso de credenciales y movimiento lateral",
+      "es_probablemente_benigno": false,
+      "confianza": "media",
+      "fichero": "community_135.json"
+    },
+    {
+      "community_id": 136,
+      "severidad": "alta",
+      "tipo_incidente": "Posible compromiso de cuenta O365 y escalada de privilegios",
+      "es_probablemente_benigno": false,
+      "confianza": "media",
+      "fichero": "community_136.json"
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+# Escenario S10 - Validacion del decaimiento temporal (Capa 3)
+#
+# PROPOSITO: este escenario NO es un incidente realista del SOC. Existe
+# unicamente para EVIDENCIAR que el decaimiento temporal del grafo de
+# filas, ya implementado en graph_layer_real.build_row_graph, es capaz de
+# separar dos incidentes que comparten una entidad cuando estan
+# suficientemente alejados en el tiempo. En el resto de escenarios
+# (S06-S09) los Dt entre filas son <2s y el decaimiento es indistinguible
+# de la identidad; aqui forzamos artificialmente un Dt grande para que el
+# efecto se vea.
+#
+# DISEÑO
+# ------
+# Dos fases CRUZADAS unicamente por una direccion IP (la entidad puente).
+# Cada fase usa sus propios usuarios y sus propias IPs internas; no
+# comparten host, ni usuario, ni cualquier otra entidad. Asi, si el grafo
+# las fusiona en una sola comunidad, es PORQUE la IP compartida ha hecho
+# de puente y no por ningun otro acoplamiento espurio.
+#
+# Tambien tenemos cuidado en que las filas DENTRO de cada fase no
+# compartan MAS entidades que las que comparten con la otra fase: si
+# todas las filas de la Fase A compartieran ademas un usuario, las
+# aristas intra-A pesarian mas que las cruzadas y Louvain ya las
+# separaria de la Fase B incluso sin decay, anulando la prueba. Por eso
+# Fase A modela un *credential stuffing*: el mismo IP atacante prueba
+# credenciales de VARIAS cuentas distintas (una por evento), de modo
+# que el unico nexo entre las filas intra-A es exactamente el mismo que
+# entre A y B: la IP atacante.
+#
+#   Fase A  (t_offset 0 .. 360 s)
+#     "Credential stuffing" O365: la IP 89.248.165.30 prueba (y
+#     consigue) sesiones contra 5 cuentas DISTINTAS de la organizacion,
+#     intercalando lecturas de buzon y creacion de regla de reenvio
+#     en una de ellas.
+#
+#   Fase B  (t_offset 3600 .. 3806 s, es decir ~1 h despues)
+#     La misma IP 89.248.165.30 genera trafico hacia destinos externos
+#     de mala reputacion. PaloAlto lo ve como amenaza y bloquea.
+#     Ningun usuario, ningun host: solo trafico IP a IP.
+#
+# Por construccion, el unico nexo entre A y B (y entre las filas dentro
+# de cada fase) es la IP 89.248.165.30.
+#
+# TIMING
+# ------
+# Span total ~64 min. Entra holgado en la ventana de extraccion de 90 min
+# del pipeline. El gap entre el ULTIMO evento de la Fase A (t=360) y el
+# PRIMERO de la Fase B (t=3600) es de 3240 s ≈ 10.8 * tau con el tau por
+# defecto de 300 s. La funcion de decaimiento exponencial evalua entonces
+#     f(3240) = exp(-10.8) ≈ 2.0e-5,
+# es decir, peso de arista practicamente cero entre las dos fases tras
+# aplicar el decay.
+#
+# COMO LANZARLO  (NO se incluye en run_seguimiento2.sh adrede)
+# --------------
+#   1) Modo SIN Wazuh (recomendado, instantaneo):
+#        .venv/bin/python demo_decay_temporal.py
+#
+#      Sintetiza directamente las filas que el pipeline produciria,
+#      construye el grafo con y sin decay y reporta el resultado.
+#
+#   2) Modo CON Wazuh (validacion end-to-end, ~65 min en tiempo real):
+#        sudo -E .venv/bin/python scenario_runner.py \
+#            scenarios/s10_temporal_decay_validation.yaml \
+#            --time-scale 1.0
+#        # esperar a indexacion + ejecutar extraccion + cluster_real.py
+#        .venv/bin/python demo_decay_temporal.py --from-pipeline
+#
+# ENTIDADES UNIQUE-TO-SCENARIO
+# ----------------------------
+#   usuarios (Fase A): tfm.s10.victima_a .. tfm.s10.victima_e
+#   ip atacante      : 89.248.165.30      <-- PUENTE entre A y B
+#   ip c2 (Fase B)   : 109.248.205.140 + 217.78.205.220
+#   subred reservada : 10.99.10.x  (no usada en S06-S09)
+#
+# VOLUMEN: ~38 alertas tras expansion de los `repeat`.
+
+incident_id: INC-S10
+name: "Validacion del decaimiento temporal: dos fases unidas por una IP"
+
+entities:
+  victim_a: "tfm.s10.victima_a"
+  victim_b: "tfm.s10.victima_b"
+  victim_c: "tfm.s10.victima_c"
+  victim_d: "tfm.s10.victima_d"
+  victim_e: "tfm.s10.victima_e"
+  attacker_ip: "89.248.165.30"
+  c2_ip1: "109.248.205.140"
+  c2_ip2: "217.78.205.220"
+
+events:
+  # =====================================================================
+  # FASE A - CREDENTIAL STUFFING DESDE LA IP ATACANTE (t = 0 .. 360 s)
+  # Cada evento implica una cuenta DISTINTA: las filas intra-A no
+  # comparten mas entidades que las que comparten con la Fase B.
+  # =====================================================================
+
+  - t_offset: 0
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim_a }}@labcorp.com"
+      client_ip: "{{ attacker_ip }}"
+      country: "RU"
+      risk_state: "atRisk"
+
+  - t_offset: 80
+    source: office365
+    type: mail_items_accessed
+    repeat: 4
+    repeat_interval: 20
+    vars:
+      user_id: "{{ victim_b }}@labcorp.com"
+      client_ip: "{{ attacker_ip }}"
+      access_type: "Bind"
+
+  - t_offset: 180
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim_c }}@labcorp.com"
+      client_ip: "{{ attacker_ip }}"
+      country: "RU"
+      risk_state: "atRisk"
+
+  - t_offset: 260
+    source: office365
+    type: new_inbox_rule
+    vars:
+      user_id: "{{ victim_d }}@labcorp.com"
+      client_ip: "{{ attacker_ip }}"
+      rule_name: "TFM-S10 archive sync"
+      forward_to: "exfil@tfm-s10-evil.tld"
+
+  - t_offset: 340
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim_e }}@labcorp.com"
+      client_ip: "{{ attacker_ip }}"
+      country: "RU"
+      risk_state: "atRisk"
+
+  # =====================================================================
+  # FASE B - LA MISMA IP APARECE EN PALOALTO ~1 H DESPUES (t = 3600 ..)
+  # =====================================================================
+
+  # CRUCE 1: la IP que comprometio cuentas O365 una hora antes genera
+  # trafico hacia un destino externo categorizado como command-and-control.
+  - t_offset: 3600
+    source: paloalto
+    type: threat_event
+    vars:
+      src_ip: "{{ attacker_ip }}"
+      dst_ip: "{{ c2_ip1 }}"
+      threat_subtype: "url"
+      category: "command-and-control"
+      severity: "high"
+      url: "{{ c2_ip1 }}/api/c2.php"
+      action: "alert"
+
+  # PaloAlto bloquea trafico hacia el destino malicioso: rafaga de drops.
+  - t_offset: 3620
+    source: paloalto
+    type: traffic_drop
+    repeat: 20
+    repeat_interval: 5
+    vars:
+      src_ip: "{{ attacker_ip }}"
+      dst_ip: "{{ c2_ip1 }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 443
+      rule_name: "TFM-S10 Block malicious destination"
+
+  # CRUCE 2: segunda IP destino, misma IP atacante de origen.
+  - t_offset: 3750
+    source: paloalto
+    type: threat_event
+    vars:
+      src_ip: "{{ attacker_ip }}"
+      dst_ip: "{{ c2_ip2 }}"
+      threat_subtype: "url"
+      category: "malware"
+      severity: "high"
+      url: "{{ c2_ip2 }}/panel/login"
+      action: "alert"
+
+  # Segunda rafaga de drops hacia el segundo destino.
+  - t_offset: 3770
+    source: paloalto
+    type: traffic_drop
+    repeat: 10
+    repeat_interval: 4
+    vars:
+      src_ip: "{{ attacker_ip }}"
+      dst_ip: "{{ c2_ip2 }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 8443
+      rule_name: "TFM-S10 Block malicious destination"

@@ -1,0 +1,42 @@
+
+========================================================================
+  Comunidad #128
+========================================================================
+
+  decoders:   [json, paloalto]
+  reglas:     [64503, 64508, 91533, 91534, 91545, 91725]
+  filas:      12
+  alertas:    71
+  clusters:   6
+
+  ENTIDADES PUENTE (presentes en ≥2 clusters de los 6 de la comunidad):
+      4 clusters ( 67%)     4 filas  user:tfm.s06.victim1 [muy genérica]
+      4 clusters ( 67%)     9 filas  ip:185.220.101.45 [muy genérica]
+      4 clusters ( 67%)     4 filas  user:tfm.s06.victim2 [muy genérica]
+      2 clusters ( 33%)     3 filas  ip:10.99.6.180 [genérica]
+      2 clusters ( 33%)     4 filas  host:pa-vm300-01 [genérica]
+
+  Entidades únicas (solo en 1 cluster): 2
+
+  DESGLOSE POR CLUSTER (top 8)
+
+    cluster 49  (3 filas, 40 alertas, paloalto, reglas 64508)
+      puentes:  host:pa-vm300-01, ip:10.99.6.180, ip:185.220.101.45
+      únicas:   ip:10.99.6.182
+
+    cluster 62  (2 filas, 24 alertas, json, reglas 91534)
+      puentes:  ip:185.220.101.45, user:tfm.s06.victim1, user:tfm.s06.victim2
+
+    cluster 104  (2 filas, 2 alertas, json, reglas 91533)
+      puentes:  ip:185.220.101.45, user:tfm.s06.victim1, user:tfm.s06.victim2
+
+    cluster 103  (2 filas, 2 alertas, json, reglas 91545)
+      puentes:  ip:185.220.101.45, user:tfm.s06.victim1, user:tfm.s06.victim2
+
+    cluster 135  (2 filas, 2 alertas, json, reglas 91725)
+      puentes:  user:tfm.s06.victim1, user:tfm.s06.victim2
+
+    cluster 59  (1 filas, 1 alertas, paloalto, reglas 64503)
+      puentes:  host:pa-vm300-01, ip:10.99.6.180
+      únicas:   ip:18.197.147.66
+

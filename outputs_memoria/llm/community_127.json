@@ -1,0 +1,103 @@
+{
+  "community_id": 127,
+  "generado": "2026-06-18T23:30:12.168167+00:00",
+  "contexto": {
+    "community_id": 127,
+    "n_filas": 11,
+    "n_alertas_originales": 71,
+    "n_clusters_capa2": 7,
+    "ventana_inicio": "2026-06-18T23:12:58.435000+00:00",
+    "ventana_fin": "2026-06-18T23:15:44.487000+00:00",
+    "duracion_segundos": 166,
+    "nivel_severidad_max": 7,
+    "decoders": [
+      "json",
+      "paloalto"
+    ],
+    "es_cross_source": true,
+    "reglas_top": [
+      {
+        "id": "91545",
+        "n": 2
+      },
+      {
+        "id": "91534",
+        "n": 2
+      },
+      {
+        "id": "91533",
+        "n": 2
+      },
+      {
+        "id": "91725",
+        "n": 2
+      },
+      {
+        "id": "64508",
+        "n": 2
+      },
+      {
+        "id": "64503",
+        "n": 1
+      }
+    ],
+    "descripciones_reglas": [
+      "Office 365: Secure Token Service (STS) logon events in Azure Active Directory.",
+      "Office 365: Events from an Exchange mailbox audit log for actions that are performed on a single item, such as creating or receiving an email message.",
+      "Office 365: Events from the Exchange admin audit log.",
+      "Office 365: User  got FullAccess permissions in Exchange",
+      "Palo Alto THREAT: high event.",
+      "Palo Alto Traffic: Session dropped  on PA-VM300-01 from 10.99.6.180 to 185.220.101.45. Reason: policy-deny. Action: drop."
+    ],
+    "usuarios": [
+      "user:user_0020_anonymized",
+      "user:user_0031_anonymized"
+    ],
+    "ips": [
+      "ip:185.220.101.45",
+      "ip:10.99.6.180",
+      "ip:18.197.147.66",
+      "ip:10.99.6.182"
+    ],
+    "hosts": [
+      "host:pa-vm300-01"
+    ],
+    "mitre_tacticas": [
+      "Persistence",
+      "Execution",
+      "Lateral Movement",
+      "Initial Access"
+    ],
+    "mitre_tecnicas": [
+      "Additional Email Delegate Permissions",
+      "Software Deployment Tools",
+      "Exploit Public-Facing Application"
+    ]
+  },
+  "triaje": {
+    "tipo_incidente": "Escalada de privilegios en O365 y actividad de red sospechosa",
+    "severidad": "alta",
+    "es_probablemente_benigno": false,
+    "entidades_clave": [
+      "user:user_0020_anonymized",
+      "user:user_0031_anonymized",
+      "ip:185.220.101.45",
+      "ip:10.99.6.180",
+      "ip:18.197.147.66"
+    ],
+    "factores_de_incertidumbre": [
+      "Falta de detalle sobre la naturaleza exacta de la 'amenaza alta' de Palo Alto.",
+      "No se especifica qué usuario obtuvo los permisos de FullAccess ni a qué buzón.",
+      "La actividad de O365 podría ser una acción administrativa legítima, aunque la correlación con la amenaza de red reduce esta probabilidad."
+    ],
+    "acciones_recomendadas": [
+      "Investigar los logs de Office 365 para las reglas 91725 (FullAccess) y 91545 (STS logon) para identificar el usuario exacto, la hora y el contexto de la concesión de permisos y los inicios de sesión.",
+      "Investigar la reputación de las IPs externas 185.220.101.45 y 18.197.147.66 y los logs de Palo Alto relacionados con la regla 64508 (THREAT: high event) y 64503 (Session dropped) para entender la naturaleza de la amenaza y el tráfico bloqueado.",
+      "Revisar la actividad reciente de los usuarios user_0020_anonymized y user_0031_anonymized en O365 y en la red para detectar otras actividades sospechosas.",
+      "Considerar la posibilidad de aislar temporalmente las cuentas de O365 afectadas o las máquinas internas asociadas a 10.99.6.180 si la evidencia de compromiso se confirma."
+    ],
+    "confianza": "media",
+    "resumen_narrativo": "Se ha detectado una posible escalada de privilegios en Office 365, donde un usuario obtuvo permisos de acceso completo a un buzón de Exchange, coincidiendo con eventos de inicio de sesión en Azure AD. Simultáneamente, Palo Alto Networks reportó una amenaza de alta severidad y bloqueó tráfico saliente desde una IP interna hacia una IP externa sospechosa. Esta correlación entre actividad en la nube y en la red sugiere un compromiso de cuenta y posible movimiento lateral o exfiltración, requiriendo una investigación urgente de los usuarios y las IPs involucradas.",
+    "_modo": "llm"
+  }
+}

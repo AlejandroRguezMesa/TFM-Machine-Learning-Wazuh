@@ -1,0 +1,114 @@
+{
+  "community_id": 135,
+  "generado": "2026-06-18T23:30:47.261383+00:00",
+  "contexto": {
+    "community_id": 135,
+    "n_filas": 17,
+    "n_alertas_originales": 97,
+    "n_clusters_capa2": 7,
+    "ventana_inicio": "2026-06-18T23:20:20.540000+00:00",
+    "ventana_fin": "2026-06-18T23:22:58.563000+00:00",
+    "duracion_segundos": 158,
+    "nivel_severidad_max": 6,
+    "decoders": [
+      "json",
+      "vcenter",
+      "paloalto"
+    ],
+    "es_cross_source": true,
+    "reglas_top": [
+      {
+        "id": "91534",
+        "n": 4
+      },
+      {
+        "id": "91545",
+        "n": 3
+      },
+      {
+        "id": "64508",
+        "n": 3
+      },
+      {
+        "id": "140007",
+        "n": 3
+      },
+      {
+        "id": "91533",
+        "n": 2
+      },
+      {
+        "id": "140006",
+        "n": 2
+      }
+    ],
+    "descripciones_reglas": [
+      "Office 365: Events from an Exchange mailbox audit log for actions that are performed on a single item, such as creating or receiving an email message.",
+      "Office 365: Secure Token Service (STS) logon events in Azure Active Directory.",
+      "Office 365: Events from the Exchange admin audit log.",
+      "Palo Alto Traffic: Session dropped  on PA-VM300-01 from 10.99.8.200 to 10.99.8.51. Reason: policy-deny. Action: drop.",
+      "Palo Alto Traffic: Session dropped  on PA-VM300-01 from 10.99.8.200 to 10.99.8.50. Reason: policy-deny. Action: drop.",
+      "vCenter [vpxd] [info] [vim.event.UserLoginSessionEvent] User VSPHERE.LOCAL\\\\user_0065_anonymized logged in as VMware vim-java 1.0"
+    ],
+    "usuarios": [
+      "user:user_0060_anonymized",
+      "user:user_0061_anonymized",
+      "user:user_0062_anonymized",
+      "user:user_0065_anonymized",
+      "user:user_0068_anonymized",
+      "user:user_0069_anonymized"
+    ],
+    "ips": [
+      "ip:10.99.8.200",
+      "ip:37.220.87.55",
+      "ip:94.140.14.14",
+      "ip:146.70.66.11",
+      "ip:10.99.8.51",
+      "ip:10.99.8.50"
+    ],
+    "hosts": [
+      "host:pa-vm300-01"
+    ],
+    "mitre_tacticas": [
+      "Execution",
+      "Lateral Movement",
+      "Initial Access"
+    ],
+    "mitre_tecnicas": [
+      "Software Deployment Tools",
+      "Exploit Public-Facing Application"
+    ]
+  },
+  "triaje": {
+    "tipo_incidente": "Posible compromiso de credenciales y movimiento lateral",
+    "severidad": "alta",
+    "es_probablemente_benigno": false,
+    "entidades_clave": [
+      "user:user_0060_anonymized",
+      "user:user_0061_anonymized",
+      "user:user_0062_anonymized",
+      "user:user_0065_anonymized",
+      "user:user_0068_anonymized",
+      "user:user_0069_anonymized",
+      "ip:10.99.8.200",
+      "ip:37.220.87.55",
+      "ip:94.140.14.14",
+      "ip:146.70.66.11",
+      "ip:10.99.8.51",
+      "ip:10.99.8.50"
+    ],
+    "factores_de_incertidumbre": [
+      "La actividad de O365 podría ser legítima (ej. administración o uso de VPNs) y los intentos de conexión interna podrían ser de una aplicación mal configurada.",
+      "La agrupación de muchos usuarios sin relación aparente podría ser un artefacto del clustering."
+    ],
+    "acciones_recomendadas": [
+      "Investigar los eventos de logon de O365 (regla 91545) para los usuarios afectados, verificando IPs de origen (especialmente las públicas) y horarios inusuales.",
+      "Analizar la actividad de los usuarios en los logs de auditoría de Exchange (reglas 91534, 64508) para identificar acciones inusuales o no autorizadas.",
+      "Investigar el origen de la IP interna 10.99.8.200 y el propósito de sus intentos de conexión a 10.99.8.50 y 10.99.8.51 (Palo Alto logs).",
+      "Correlacionar la actividad de user_0065_anonymized en vCenter con el resto de los eventos para buscar patrones."
+    ],
+    "confianza": "media",
+    "resumen_narrativo": "Se ha detectado una ráfaga de actividad en un corto periodo de tiempo (158 segundos) que involucra a múltiples usuarios en Office 365 (logons, acciones de auditoría de buzón y administración) y, simultáneamente, intentos de conexión interna desde una IP (10.99.8.200) que fueron bloqueados por el firewall Palo Alto. Esto sugiere un posible compromiso de credenciales que ha llevado a un acceso inicial y a intentos de movimiento lateral o reconocimiento interno. La correlación de eventos de O365 con IPs públicas y actividad interna bloqueada eleva la severidad del incidente.",
+    "_modo": "llm"
+  }
+}

@@ -1,0 +1,30 @@
+
+========================================================================
+  Comunidad #57
+========================================================================
+
+  decoders:   [json]
+  reglas:     [91532]
+  filas:      4
+  alertas:    5
+  clusters:   4
+
+  ENTIDADES PUENTE (presentes en ≥2 clusters de los 4 de la comunidad):
+      4 clusters (100%)     4 filas  user:a3e155a6-fc2e-4786-beef-07e4b83fda18 [muy genérica]
+
+  Entidades únicas (solo en 1 cluster): 0
+
+  DESGLOSE POR CLUSTER (top 8)
+
+    cluster 137  (1 filas, 2 alertas, json, reglas 91532)
+      puentes:  user:a3e155a6-fc2e-4786-beef-07e4b83fda18
+
+    cluster -1  (1 filas, 1 alertas, json, reglas 91532)
+      puentes:  user:a3e155a6-fc2e-4786-beef-07e4b83fda18
+
+    cluster 136  (1 filas, 1 alertas, json, reglas 91532)
+      puentes:  user:a3e155a6-fc2e-4786-beef-07e4b83fda18
+
+    cluster 142  (1 filas, 1 alertas, json, reglas 91532)
+      puentes:  user:a3e155a6-fc2e-4786-beef-07e4b83fda18
+

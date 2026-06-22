@@ -1,0 +1,70 @@
+{
+  "community_id": 126,
+  "generado": "2026-06-18T23:29:55.832037+00:00",
+  "contexto": {
+    "community_id": 126,
+    "n_filas": 2,
+    "n_alertas_originales": 2,
+    "n_clusters_capa2": 1,
+    "ventana_inicio": "2026-06-18T23:11:56.412000+00:00",
+    "ventana_fin": "2026-06-18T23:11:58.414000+00:00",
+    "duracion_segundos": 2,
+    "nivel_severidad_max": 3,
+    "decoders": [
+      "sudo",
+      "pam"
+    ],
+    "es_cross_source": true,
+    "reglas_top": [
+      {
+        "id": "5402",
+        "n": 1
+      },
+      {
+        "id": "5501",
+        "n": 1
+      }
+    ],
+    "descripciones_reglas": [
+      "Successful sudo to ROOT executed.",
+      "PAM: Login session opened."
+    ],
+    "usuarios": [
+      "user:user_0064_anonymized"
+    ],
+    "ips": [],
+    "hosts": [],
+    "mitre_tacticas": [
+      "Privilege Escalation",
+      "Defense Evasion",
+      "Persistence",
+      "Initial Access"
+    ],
+    "mitre_tecnicas": [
+      "Sudo and Sudo Caching",
+      "Valid Accounts"
+    ]
+  },
+  "triaje": {
+    "tipo_incidente": "Escalada de privilegios exitosa",
+    "severidad": "media",
+    "es_probablemente_benigno": false,
+    "entidades_clave": [
+      "user:user_0064_anonymized"
+    ],
+    "factores_de_incertidumbre": [
+      "Ausencia de información sobre el host o la dirección IP donde ocurrió el evento.",
+      "La actividad podría ser rutinaria si el usuario es un administrador de sistemas y el host es de gestión.",
+      "La severidad de las reglas base es baja (nivel 3), lo que requiere más contexto para justificar una alerta de alta prioridad."
+    ],
+    "acciones_recomendadas": [
+      "Identificar el host donde el usuario 'user_0064_anonymized' ejecutó el comando sudo.",
+      "Verificar si 'user_0064_anonymized' tiene permisos legítimos para ejecutar sudo a root en ese host y si la acción fue programada o esperada.",
+      "Revisar los logs del sistema operativo en el host afectado para buscar comandos ejecutados inmediatamente después de la escalada de privilegios.",
+      "Contactar al propietario del sistema o al usuario para validar la actividad."
+    ],
+    "confianza": "media",
+    "resumen_narrativo": "Se ha detectado que el usuario 'user_0064_anonymized' ejecutó exitosamente un comando sudo para obtener privilegios de root, coincidiendo con la apertura de una sesión PAM en un lapso de 2 segundos. Esto sugiere una escalada de privilegios exitosa. Sin embargo, la ausencia de información sobre el host y la posibilidad de que sea una actividad administrativa legítima requieren una investigación adicional para determinar la naturaleza del evento.",
+    "_modo": "llm"
+  }
+}

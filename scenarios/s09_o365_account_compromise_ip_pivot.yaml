@@ -1,0 +1,193 @@
+# Escenario S09 — Compromiso de cuenta O365 con pivote por IP
+#
+# DEMUESTRA: la Capa 3 correlacionando TRES fuentes (Office 365 +
+# SentinelOne + PaloAlto) cuyo unico nexo es una DIRECCION IP
+# compartida. A diferencia de S06-S08, donde el cruce se apoyaba
+# tambien en usuarios y hosts, aqui el hilo conductor es la IP del
+# atacante: el mismo origen que comete el compromiso en O365 aparece
+# despues en los drops de PaloAlto y en el endpoint que SentinelOne
+# marca como infectado.
+#
+# CADENA DE ATAQUE:
+#   Fase 1  Compromiso de la cuenta O365 (login de riesgo + acceso a
+#           buzon + regla de reenvio + permisos sobre otro buzon),
+#           todo desde la IP atacante.
+#   Fase 2  Esa misma IP genera trafico hacia destinos de mala
+#           reputacion; PaloAlto lo detecta y lo bloquea (muchos drops).
+#   Fase 3  SentinelOne detecta amenazas en el endpoint asociado a esa
+#           IP: el compromiso de identidad ha aterrizado en una maquina.
+#
+# Entidades UNIQUE-TO-SCENARIO (prefijo/[sub]red propios, no en fondo):
+#   victim_user*:   tfm.s09.* (forma O365) y tfm-s09-* (forma AD)
+#   attacker_ip:    91.198.22.70   (IP atacante, NEXO de la correlacion)
+#   victim_host:    TFM-WS-S09-01  (endpoint comprometido)
+#   victim_lan_ip:  10.99.9.40     (subred 10.99.9.x reservada a S09)
+#   c2_ip*:         45.137.21.230 + 185.100.87.202 (destinos de C2)
+#
+# VOLUMEN: ~70 alertas. Ventana ~13 min.
+
+incident_id: INC-S09
+name: "Compromiso de cuenta Office 365 con pivote por IP a endpoint"
+
+entities:
+  victim_user1: "tfm.s09.lucia"
+  victim_user2: "tfm.s09.pablo"
+  victim_user1_ad: "tfm-s09-lucia"
+  attacker_ip: "91.198.22.70"
+  victim_host: "TFM-WS-S09-01"
+  victim_lan_ip: "10.99.9.40"
+  c2_ip1: "45.137.21.230"
+  c2_ip2: "185.100.87.202"
+
+events:
+  # === FASE 1: COMPROMISO DE LA CUENTA O365 ===
+  # Login de riesgo desde la IP del atacante, en un pais inhabitual.
+  - t_offset: 0
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim_user1 }}"
+      client_ip: "{{ attacker_ip }}"
+      country: "RU"
+      risk_state: "atRisk"
+
+  # El atacante accede al buzon de la victima.
+  - t_offset: 35
+    source: office365
+    type: mail_items_accessed
+    repeat: 6
+    repeat_interval: 20
+    vars:
+      user_id: "{{ victim_user1 }}"
+      client_ip: "{{ attacker_ip }}"
+      access_type: "Bind"
+
+  # Crea una regla de reenvio para exfiltrar el correo de forma silenciosa.
+  - t_offset: 180
+    source: office365
+    type: new_inbox_rule
+    vars:
+      user_id: "{{ victim_user1 }}"
+      client_ip: "{{ attacker_ip }}"
+      rule_name: "TFM-S09 sync-archive"
+      forward_to: "exfil@tfm-s09-evil.tld"
+
+  # Se concede permisos sobre el buzon de un segundo usuario:
+  # el compromiso empieza a propagarse.
+  - t_offset: 220
+    source: office365
+    type: add_mailbox_full_access
+    vars:
+      user_id: "{{ victim_user1 }}"
+      target_mailbox: "{{ victim_user2 }}@labcorp.com"
+
+  - t_offset: 260
+    source: office365
+    type: user_logged_in
+    vars:
+      user_id: "{{ victim_user2 }}"
+      client_ip: "{{ attacker_ip }}"
+      country: "RU"
+      risk_state: "atRisk"
+
+  - t_offset: 290
+    source: office365
+    type: mail_items_accessed
+    repeat: 4
+    repeat_interval: 25
+    vars:
+      user_id: "{{ victim_user2 }}"
+      client_ip: "{{ attacker_ip }}"
+      access_type: "Bind"
+
+  # === FASE 2: LA MISMA IP APARECE EN PALOALTO ===
+  # CRUCE 1: la IP que comprometio O365 genera trafico hacia C2.
+  # PaloAlto lo ve como amenaza y lo bloquea repetidamente.
+  - t_offset: 400
+    source: paloalto
+    type: threat_event
+    vars:
+      src_ip: "{{ attacker_ip }}"
+      dst_ip: "{{ c2_ip1 }}"
+      threat_subtype: "url"
+      category: "command-and-control"
+      severity: "high"
+      url: "{{ c2_ip1 }}/gate.php"
+      action: "alert"
+
+  - t_offset: 420
+    source: paloalto
+    type: traffic_drop
+    repeat: 35
+    repeat_interval: 4
+    vars:
+      src_ip: "{{ attacker_ip }}"
+      dst_ip: "{{ c2_ip1 }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 443
+      rule_name: "TFM-S09 Block malicious destination"
+
+  - t_offset: 580
+    source: paloalto
+    type: threat_event
+    vars:
+      src_ip: "{{ attacker_ip }}"
+      dst_ip: "{{ c2_ip2 }}"
+      threat_subtype: "url"
+      category: "malware"
+      severity: "high"
+      url: "{{ c2_ip2 }}/panel/upload"
+      action: "alert"
+
+  - t_offset: 600
+    source: paloalto
+    type: traffic_drop
+    repeat: 20
+    repeat_interval: 5
+    vars:
+      src_ip: "{{ attacker_ip }}"
+      dst_ip: "{{ c2_ip2 }}"
+      action: "drop"
+      protocol: "tcp"
+      dst_port: 8443
+      rule_name: "TFM-S09 Block malicious destination"
+
+  # === FASE 3: EL ENDPOINT ASOCIADO CAE (SentinelOne) ===
+  # CRUCE 2: SentinelOne detecta amenazas en el endpoint cuyo trafico
+  # PaloAlto ha estado bloqueando. La identidad comprometida ha
+  # aterrizado en una maquina concreta.
+  - t_offset: 700
+    source: sentinelone_threats
+    type: active_threat
+    vars:
+      computer_name: "{{ victim_host }}"
+      threat_name: "TFM-Trojan.S09.Loader"
+      file_path: "C:\\\\Users\\\\Public\\\\o365sync.exe"
+      mitigation_mode: "detect"
+      classification: "Trojan"
+
+  - t_offset: 740
+    source: sentinelone_threats
+    type: active_threat
+    vars:
+      computer_name: "{{ victim_host }}"
+      threat_name: "TFM-Infostealer.S09.Creds"
+      file_path: "C:\\\\Users\\\\Public\\\\Downloads\\\\creds.bin"
+      mitigation_mode: "detect"
+      classification: "Infostealer"
+
+  - t_offset: 770
+    source: sentinelone_device
+    type: usb_inserted
+    vars:
+      computer_name: "{{ victim_host }}"
+      device_name: "TFM-S09 SanDisk Ultra 64GB"
+      event_type: "Inserted"
+
+  - t_offset: 800
+    source: sentinelone_threats
+    type: mitigated_threat
+    vars:
+      computer_name: "{{ victim_host }}"
+      threat_name: "TFM-Trojan.S09.Loader"

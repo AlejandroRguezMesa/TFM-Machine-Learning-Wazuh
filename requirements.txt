@@ -1,0 +1,14 @@
+# Pipeline de correlación multi-capa — dependencias Python
+# Instalar en un entorno virtual:  python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+pandas>=2.0
+numpy>=1.24
+pyarrow>=15.0
+scikit-learn>=1.5
+hdbscan>=0.8.33
+umap-learn>=0.5.5
+networkx>=3.3
+python-louvain>=0.16
+opensearch-py>=2.4
+pyyaml>=6.0
+python-dotenv>=1.0
+matplotlib>=3.7

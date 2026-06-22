@@ -1,0 +1,78 @@
+{
+  "community_id": 1,
+  "generado": "2026-06-18T23:29:08.002302+00:00",
+  "contexto": {
+    "community_id": 1,
+    "n_filas": 71,
+    "n_alertas_originales": 884,
+    "n_clusters_capa2": 9,
+    "ventana_inicio": "2026-06-18T22:12:31.380000+00:00",
+    "ventana_fin": "2026-06-18T22:42:26.259000+00:00",
+    "duracion_segundos": 1794,
+    "nivel_severidad_max": 3,
+    "decoders": [
+      "vcenter"
+    ],
+    "es_cross_source": false,
+    "reglas_top": [
+      {
+        "id": "140007",
+        "n": 31
+      },
+      {
+        "id": "140006",
+        "n": 31
+      },
+      {
+        "id": "140010",
+        "n": 9
+      }
+    ],
+    "descripciones_reglas": [
+      "vCenter [vpxd] [info] [vim.event.TaskEvent] Task: Recompute virtual disk digest",
+      "vCenter [vpxd] [info] [vim.event.UserLoginSessionEvent] User user_0070_anonymized@10.253.13.95 logged in as Apache-CXF/3.4.10",
+      "vCenter [vpxd] [info] [vim.event.UserLoginSessionEvent] User user_0070_anonymized@10.253.13.25 logged in as Apache-CXF/3.4.10",
+      "vCenter [vpxd] [info] [vim.event.UserLoginSessionEvent] User user_0070_anonymized@10.253.13.27 logged in as Apache-CXF/3.4.10",
+      "vCenter [vpxd] [info] [vim.event.UserLogoutSessionEvent] User user_0070_anonymized@10.253.13.25 logged out (login time: Monday, 25 May, 2026 12:00:20 AM, number of API invocations: 1, user agent: Apache-CXF/3.4.10)",
+      "vCenter [vpxd] [info] [vim.event.UserLogoutSessionEvent] User user_0070_anonymized@10.253.13.25 logged out (login time: Monday, 25 May, 2026 12:43:50 AM, number of API invocations: 1, user agent: Apache-CXF/3.4.10)"
+    ],
+    "usuarios": [
+      "user:user_0070_anonymized"
+    ],
+    "ips": [
+      "ip:10.253.13.95",
+      "ip:10.253.13.27",
+      "ip:10.253.13.24",
+      "ip:10.253.13.25",
+      "ip:10.253.13.94"
+    ],
+    "hosts": [],
+    "mitre_tacticas": [],
+    "mitre_tecnicas": []
+  },
+  "triaje": {
+    "tipo_incidente": "Actividad de gestión rutinaria en vCenter",
+    "severidad": "informativa",
+    "es_probablemente_benigno": true,
+    "entidades_clave": [
+      "user:user_0070_anonymized",
+      "ip:10.253.13.95",
+      "ip:10.253.13.27",
+      "ip:10.253.13.24",
+      "ip:10.253.13.25",
+      "ip:10.253.13.94"
+    ],
+    "factores_de_incertidumbre": [
+      "No se conoce la aplicación específica que utiliza Apache-CXF para interactuar con vCenter."
+    ],
+    "acciones_recomendadas": [
+      "Verificar si 'user_0070_anonymized' es una cuenta de servicio esperada para automatización.",
+      "Identificar los sistemas asociados a las IPs de origen (10.253.13.x) para confirmar su legitimidad.",
+      "Confirmar si las tareas de 'Recompute virtual disk digest' son parte de una operación programada o de mantenimiento.",
+      "Considerar la supresión de estas alertas si se confirma que son actividad benigna y rutinaria."
+    ],
+    "confianza": "alta",
+    "resumen_narrativo": "Un único usuario, 'user_0070_anonymized', está realizando múltiples inicios y cierres de sesión en vCenter desde varias IPs internas, utilizando un agente de usuario 'Apache-CXF'. Esta actividad se correlaciona con tareas de mantenimiento como 'Recompute virtual disk digest'. Dada la baja severidad de las alertas y el patrón de actividad, es muy probable que se trate de una herramienta de automatización o gestión legítima interactuando con vCenter.",
+    "_modo": "llm"
+  }
+}

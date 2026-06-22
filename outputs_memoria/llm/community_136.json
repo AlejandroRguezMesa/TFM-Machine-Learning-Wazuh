@@ -1,0 +1,102 @@
+{
+  "community_id": 136,
+  "generado": "2026-06-18T23:31:04.902604+00:00",
+  "contexto": {
+    "community_id": 136,
+    "n_filas": 11,
+    "n_alertas_originales": 71,
+    "n_clusters_capa2": 6,
+    "ventana_inicio": "2026-06-18T23:23:44.578000+00:00",
+    "ventana_fin": "2026-06-18T23:26:02.599000+00:00",
+    "duracion_segundos": 138,
+    "nivel_severidad_max": 7,
+    "decoders": [
+      "json",
+      "paloalto"
+    ],
+    "es_cross_source": true,
+    "reglas_top": [
+      {
+        "id": "91534",
+        "n": 3
+      },
+      {
+        "id": "64508",
+        "n": 3
+      },
+      {
+        "id": "91545",
+        "n": 2
+      },
+      {
+        "id": "91533",
+        "n": 1
+      },
+      {
+        "id": "91725",
+        "n": 1
+      },
+      {
+        "id": "64503",
+        "n": 1
+      }
+    ],
+    "descripciones_reglas": [
+      "Office 365: Events from an Exchange mailbox audit log for actions that are performed on a single item, such as creating or receiving an email message.",
+      "Office 365: Secure Token Service (STS) logon events in Azure Active Directory.",
+      "Palo Alto Traffic: Session dropped  on PA-VM300-01 from 91.198.22.70 to 185.100.87.202. Reason: policy-deny. Action: drop.",
+      "Office 365: Events from the Exchange admin audit log.",
+      "Office 365: User  got FullAccess permissions in Exchange",
+      "Palo Alto THREAT: high event."
+    ],
+    "usuarios": [
+      "user:user_0066_anonymized",
+      "user:user_0067_anonymized"
+    ],
+    "ips": [
+      "ip:91.198.22.70",
+      "ip:185.100.87.202",
+      "ip:18.197.147.66",
+      "ip:45.137.21.230"
+    ],
+    "hosts": [
+      "host:pa-vm300-01"
+    ],
+    "mitre_tacticas": [
+      "Execution",
+      "Lateral Movement",
+      "Initial Access",
+      "Persistence"
+    ],
+    "mitre_tecnicas": [
+      "Software Deployment Tools",
+      "Exploit Public-Facing Application",
+      "Additional Email Delegate Permissions"
+    ]
+  },
+  "triaje": {
+    "tipo_incidente": "Posible compromiso de cuenta O365 y escalada de privilegios",
+    "severidad": "alta",
+    "es_probablemente_benigno": false,
+    "entidades_clave": [
+      "user:user_0066_anonymized",
+      "user:user_0067_anonymized",
+      "ip:91.198.22.70",
+      "host:pa-vm300-01"
+    ],
+    "factores_de_incertidumbre": [
+      "La relación directa entre la amenaza de red de Palo Alto y la escalada de privilegios en O365 se infiere por la agrupación, pero no está explícitamente detallada.",
+      "La naturaleza específica de la 'amenaza alta' de Palo Alto (regla 64503) no se conoce.",
+      "No se especifica qué usuario otorgó los permisos de FullAccess y a quién."
+    ],
+    "acciones_recomendadas": [
+      "Investigar los logs de auditoría de Office 365 para determinar quién otorgó los permisos de FullAccess y a qué usuario, y si esta acción fue autorizada.",
+      "Analizar la reputación y actividad previa de la IP 91.198.22.70 y los detalles del evento de amenaza de Palo Alto (regla 64503).",
+      "Revisar la actividad reciente de los usuarios user_0066_anonymized y user_0067_anonymized en O365 y otros sistemas.",
+      "Considerar la revocación temporal de los permisos de FullAccess si no se justifica rápidamente."
+    ],
+    "confianza": "media",
+    "resumen_narrativo": "Esta comunidad de alertas sugiere una posible actividad maliciosa que involucra Office 365 y la red. Se ha detectado que un usuario obtuvo permisos de FullAccess en Exchange, lo que es un evento de alta sensibilidad, mientras que el firewall Palo Alto registró una amenaza de alta severidad y bloqueó tráfico desde una IP externa. La correlación de estos eventos en un corto período de tiempo y de diferentes fuentes indica una posible escalada de privilegios o compromiso de cuenta, posiblemente con un intento de acceso inicial o persistencia. Es crucial investigar la legitimidad de los permisos y la naturaleza de la amenaza de red.",
+    "_modo": "llm"
+  }
+}

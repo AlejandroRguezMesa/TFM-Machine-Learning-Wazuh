@@ -1,0 +1,130 @@
+{
+  "community_id": 7,
+  "generado": "2026-06-18T23:29:25.886225+00:00",
+  "contexto": {
+    "community_id": 7,
+    "n_filas": 137,
+    "n_alertas_originales": 342,
+    "n_clusters_capa2": 21,
+    "ventana_inicio": "2026-06-18T22:12:37.233000+00:00",
+    "ventana_fin": "2026-06-18T22:42:20.407000+00:00",
+    "duracion_segundos": 1783,
+    "nivel_severidad_max": 5,
+    "decoders": [
+      "json"
+    ],
+    "es_cross_source": false,
+    "reglas_top": [
+      {
+        "id": "91578",
+        "n": 55
+      },
+      {
+        "id": "91532",
+        "n": 41
+      },
+      {
+        "id": "91534",
+        "n": 10
+      },
+      {
+        "id": "91707",
+        "n": 9
+      },
+      {
+        "id": "91555",
+        "n": 7
+      },
+      {
+        "id": "91537",
+        "n": 5
+      },
+      {
+        "id": "91535",
+        "n": 5
+      },
+      {
+        "id": "91545",
+        "n": 4
+      }
+    ],
+    "descripciones_reglas": [
+      "Office 365: Events related to the MailItemsAccessed mailbox auditing action.",
+      "Office 365: Planner TaskListRead operation.",
+      "Office 365: Events from an Exchange mailbox audit log for actions that are performed on a single item, such as creating or receiving an email message.",
+      "Office 365: Sent message",
+      "Office 365: Events from Microsoft Teams.",
+      "Office 365: Planner PlanRead operation."
+    ],
+    "usuarios": [
+      "user:user_0072_anonymized",
+      "user:user_0100_anonymized",
+      "user:user_0097_anonymized",
+      "user:user_0118_anonymized",
+      "user:user_0090_anonymized",
+      "user:user_0092_anonymized",
+      "user:user_0106_anonymized",
+      "user:user_0151_anonymized",
+      "user:user_0184_anonymized"
+    ],
+    "ips": [
+      "ip:212.64.161.47",
+      "ip:20.86.93.33",
+      "ip:80.28.248.211",
+      "ip:2603:10a6:800:319::24",
+      "ip:2603:10a6:102:341::20",
+      "ip:31.4.214.87",
+      "ip:2a02:9130:a424:9f6d:13b:1ae3:718d:d2d",
+      "ip:4.182.151.194",
+      "ip:2603:10a6:800:1c4::21",
+      "ip:2.137.213.43"
+    ],
+    "hosts": [],
+    "mitre_tacticas": [
+      "Collection"
+    ],
+    "mitre_tecnicas": [
+      "Email Forwarding Rule"
+    ]
+  },
+  "triaje": {
+    "tipo_incidente": "Actividad de Office 365 con posible recolección de información",
+    "severidad": "baja",
+    "es_probablemente_benigno": false,
+    "entidades_clave": [
+      "user:user_0072_anonymized",
+      "user:user_0100_anonymized",
+      "user:user_0097_anonymized",
+      "user:user_0118_anonymized",
+      "user:user_0090_anonymized",
+      "user:user_0092_anonymized",
+      "user:user_0106_anonymized",
+      "user:user_0151_anonymized",
+      "user:user_0184_anonymized",
+      "ip:212.64.161.47",
+      "ip:20.86.93.33",
+      "ip:80.28.248.211",
+      "ip:2603:10a6:800:319::24",
+      "ip:2603:10a6:102:341::20",
+      "ip:31.4.214.87",
+      "ip:2a02:9130:a424:9f6d:13b:1ae3:718d:d2d",
+      "ip:4.182.151.194",
+      "ip:2603:10a6:800:1c4::21",
+      "ip:2.137.213.43"
+    ],
+    "factores_de_incertidumbre": [
+      "La baja severidad máxima de las reglas (nivel 5) sugiere actividad rutinaria o de bajo impacto.",
+      "La técnica MITRE 'Email Forwarding Rule' no se deriva directamente de las descripciones de las reglas principales, lo que genera incertidumbre sobre su relevancia.",
+      "La agrupación de múltiples usuarios y IPs podría ser un artefacto del algoritmo de clustering, reflejando actividad similar pero no coordinada."
+    ],
+    "acciones_recomendadas": [
+      "Revisar las alertas individuales para los usuarios y IPs involucrados, buscando patrones inusuales de acceso a buzones (regla 91578).",
+      "Verificar si alguna de las IPs involucradas tiene reputación maliciosa conocida.",
+      "Investigar si se han configurado reglas de reenvío de correo en los buzones de los usuarios afectados, especialmente si la técnica MITRE es precisa.",
+      "Analizar la actividad de Planner y Teams para los usuarios involucrados para detectar anomalías."
+    ],
+    "confianza": "baja",
+    "resumen_narrativo": "Se observa una comunidad de alertas de Office 365 que involucra a múltiples usuarios y direcciones IP, principalmente relacionadas con el acceso a buzones, actividad de Planner y Teams. Aunque la severidad máxima de las reglas es baja, la presencia de eventos de 'MailItemsAccessed' y la técnica MITRE 'Collection' con 'Email Forwarding Rule' sugieren una posible recolección de información. Es crucial investigar la actividad de los usuarios y las IPs, así como la posible configuración de reglas de reenvío, para determinar si se trata de actividad rutinaria o un intento de exfiltración de datos.",
+    "_modo": "llm"
+  }
+}
